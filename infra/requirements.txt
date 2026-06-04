@@ -1,0 +1,4 @@
+# Canonical dependency list (CDK convention). Kept in sync with pyproject.toml.
+# Local dev uses uv (`uv sync`); CI / pip users can `pip install -r requirements.txt`.
+aws-cdk-lib>=2.170.0
+constructs>=10.3.0

@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# uv
+uv.lock
+
+# Node / Next.js
+node_modules/
+web/.next/
+web/out/
+web/.vercel/
+*.tsbuildinfo
+pnpm-debug.log*
+
+# CDK
+infra/cdk.out/
+infra/.cdk.staging/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+.aws-sam/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

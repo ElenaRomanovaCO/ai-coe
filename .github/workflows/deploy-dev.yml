@@ -1,0 +1,51 @@
+name: Deploy (dev)
+
+# Manual-trigger only — solo demo. Assumes a GitHub OIDC role with deploy rights.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm'
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ inputs.confirm == 'deploy' }}
+    runs-on: ubuntu-latest
+    environment: dev # add a required-reviewer protection rule for manual approval
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Sync infra deps
+        working-directory: infra
+        run: uv sync
+
+      - name: Create S3 Vectors index (idempotent)
+        run: uv run python infra/scripts/create_vector_index.py
+
+      - name: CDK deploy
+        working-directory: infra
+        run: npx --yes aws-cdk@latest deploy --all --require-approval never

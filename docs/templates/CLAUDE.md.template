@@ -1,0 +1,357 @@
+# CLAUDE.md — {PROJECT_NAME}
+
+> **Purpose:** project context for every Claude Code session. Defines methodology (skills, templates, prompts), behavioral guardrails, architecture defaults, and conventions.
+>
+> **How to use this template:** copy to your project root as `CLAUDE.md`, replace the `{PLACEHOLDERS}` in the Project Overview and Tech Stack sections, leave the methodology sections as-is unless your project deviates.
+
+---
+
+## Project Overview
+
+**{PROJECT_NAME}** is {PROJECT_ONE_LINE_PITCH}.
+
+**Type:** {PROJECT_TYPE — e.g., multi-agent SaaS / RAG application / internal tool / agent platform}
+**Stack bias:** {STACK_ONE_LINE — e.g., AWS-native (Bedrock + Strands), Python/FastAPI, Next.js + Tailwind. Overridable per feature.}
+**Status:** {ACTIVE_PHASE — e.g., MVP build / production / maintenance}
+
+---
+
+## Behavioral Principles (Karpathy Guidelines)
+
+> Full source: `templates/optimized/karpathy-guidelines.md` (or wherever you copied the methodology). Embedded below because CLAUDE.md is always-loaded context.
+
+### 1. Think Before Coding
+
+State assumptions explicitly. If uncertain, ask. If multiple interpretations exist, present them, don't pick silently. If a simpler approach exists, say so. If something is unclear, stop and name what's confusing before guessing.
+
+### 2. Simplicity First
+
+Minimum code that solves the problem. Nothing speculative. No features beyond what was asked. No abstractions for single-use code. No "flexibility" that wasn't requested. No error handling for impossible scenarios. If you write 200 lines and it could be 50, rewrite it.
+
+### 3. Surgical Changes
+
+Touch only what you must. Don't improve adjacent code, comments, or formatting. Don't refactor things that aren't broken. Match existing style. If you notice unrelated dead code, mention it, don't delete it. Every changed line should trace directly to the request.
+
+### 4. Goal-Driven Execution
+
+Transform tasks into verifiable goals: "Add validation" → "Write tests for invalid inputs, then make them pass." For multi-step tasks, state the plan with verification checks per step. Strong success criteria let you loop independently; weak criteria ("make it work") cause rework.
+
+---
+
+## Methodology Suite
+
+Three layers that work together:
+
+| Layer | What it is | Location |
+|---|---|---|
+| **Skills** | Auto-invoking expertise based on conversation triggers | `~/.claude/skills/` (user-level), mirrored to `.claude/skills/` if you want them in-project |
+| **Templates** | Heavyweight, conversational session starters (paste whole file) | `templates/optimized/` |
+| **SDLC prompts** | Lightweight copy-paste prompts for day-to-day tasks | `sdlc_prompts/` |
+
+**Decision flow:**
+- New project / feature from scratch → use templates 01 → (02a) → (02b) → 02 → 03 in sequence
+- Specific task during ongoing work → grab the matching prompt from `sdlc_prompts/`
+- Specialized question → relevant skill auto-invokes as the conversation goes
+
+---
+
+## Skills (7 skills, auto-invoking)
+
+Grouped by development lifecycle phase. Triggers in each skill's `description:` field — Claude activates them automatically based on the conversation.
+
+### Design phase
+- **`agent-architect`** — multi-agent topology, coordination patterns (orchestrator / choreography / hierarchical), AWS service selection (Bedrock AgentCore / Strands / Step Functions), state management strategies.
+- **`agent-guardrails`** — safety, content, and security boundaries: prompt injection defense, PII redaction, tool permission boundaries, fail-open vs fail-closed policy.
+
+### Build phase
+- **`agentic-code-review`** — agent-specific anti-patterns: runaway loops, error handling, prompt injection, race conditions, cost waste, non-deterministic bugs, multi-agent coordination.
+- **`agent-testing-strategy`** — test pyramid for agents, what to mock vs run real, CI cost staging, eval vs test boundary.
+- **`agentic-ux`** — how agents are surfaced in UI: visibility model (black/grey/glass box), streaming vs batched, approval flows, error states, trust signals.
+
+### Validate phase
+- **`agent-evals`** — golden datasets, LLM-as-judge calibration, regression suites, deployment gates, online drift detection.
+
+### Operate phase
+- **`cost-optimizer`** — model routing (Haiku / Sonnet / Opus), provider + application caching, prompt engineering for tokens, batching, output token discipline.
+
+---
+
+## Templates (5 heavyweight session starters)
+
+Located in `templates/optimized/`. Paste the file into a fresh Claude Code session.
+
+| File | Stage | Output |
+|---|---|---|
+| `01_brainstorm_brief.md` | Brainstorm requirements | `ai_docs/brief.md` |
+| `02a_generate_system_design.md` | (Optional) Architecture deep-dive | `ai_docs/design.md` |
+| `02b_generate_ui_requirements.md` | (Optional) UI requirements + agent UX | `ai_docs/ui_requirements.md` |
+| `02_generate_implementation_plan.md` | Full implementation plan | `ai_docs/plan.md` |
+| `03_generate_tasks.md` | Per-feature standalone task prompts | `ai_docs/tasks/INDEX.md` + `NN_*.md` |
+
+---
+
+## SDLC Prompts (7 phase files)
+
+Located in `sdlc_prompts/`. Copy the specific prompt for the task at hand.
+
+| File | Phase covers |
+|---|---|
+| `1-ideation-prompts.md` | UI requirements quick pass, agent architecture brainstorm, agent UX brainstorm, feasibility validation |
+| `2-planning-prompts.md` | ADRs, eval strategy, guardrails strategy, testing strategy, cost budget, deployment plan |
+| `3-implementation-prompts.md` | Code review, cost analysis, test scaffolding, adding agents, UI surface implementation, refactoring, debugging |
+| `4-testing-prompts.md` | E2E execution, quality eval, guardrail adversarial tests, Playwright UI tests, coverage analysis, perf testing |
+| `5-review-prompts.md` | Architecture review, code quality review, security audit, eval gate, pre-deploy checklist, tech debt |
+| `6-optimization-prompts.md` | Cost + perf pass, agent tuning, infra optimization, cache strategy, model selection |
+| `7-maintenance-prompts.md` | Incident investigation, agent debugging, dependency updates, monitoring improvement, docs update, knowledge transfer |
+
+---
+
+## Unified Artifact Path Convention
+
+All methodology output goes under `ai_docs/`. Single-output artifacts at root, multi-output in subdirs.
+
+```
+ai_docs/
+├── brief.md              # template 01
+├── design.md             # template 02a (optional)
+├── ui_requirements.md    # template 02b (optional)
+├── plan.md               # template 02
+├── eval-strategy.md      # planning prompt
+├── guardrails-strategy.md # planning prompt
+├── testing-strategy.md   # planning prompt
+├── cost-budget.md        # planning prompt
+├── deployment-plan.md    # planning prompt
+├── tasks/                # template 03 (per-feature task prompts)
+├── decisions/            # ADRs from planning prompts
+├── reviews/              # code/architecture/eval-gate/pre-deploy reviews
+├── audits/               # security audits
+├── reports/              # cost, perf, eval, coverage, monitoring reports
+├── postmortems/          # incident reports
+└── notes/                # informal in-flight notes
+```
+
+---
+
+## Multi-Agent Architecture Defaults
+
+Quick reference. Depth lives in the `agent-architect` skill, which auto-invokes on architecture questions.
+
+**Coordination pattern (default: orchestrator):**
+- **Orchestrator** for strict sequencing, central monitoring, strong consistency. Single point of failure trade-off.
+- **Choreography (event-driven)** for high independence, eventual consistency. Harder debugging trade-off.
+- **Hierarchical** for layered complexity (strategic / tactical / execution).
+
+**Communication (default: async):**
+- **Async via EventBridge** for decoupled domain events
+- **SQS** for work queues and retries
+- **Sync via API Gateway + Lambda** only for user-facing operations requiring immediate response
+- **Streaming (Bedrock streaming / WebSocket)** for incremental LLM responses to the UI
+
+**State (default: DynamoDB):**
+- DynamoDB with conditional writes for atomic shared state
+- TTL attributes for automatic cleanup of completed workflows
+- Per-agent tables for fully independent agents
+- Event sourcing only when audit trail is a hard requirement
+
+**Model routing (default: Sonnet, escalate or downgrade with reason):**
+- **Haiku family** — classification, extraction, routing, simple Q&A
+- **Sonnet family** — balanced workflows (most production cases)
+- **Opus family** — genuine multi-step reasoning, only when needed
+
+**Reliability (always):**
+- Timeout on every LLM call and tool call
+- Max retries with exponential backoff
+- Typed exception handling, never bare `except:`
+- Fallback strategy when primary model or tool fails
+- Circuit breakers on external dependencies
+
+**Where guardrails sit (decide at design time, not bolt-on):**
+- Input layer: prompt injection detection, PII redaction, topic restriction
+- Output layer: PII leakage check, schema validation, citation enforcement
+- Tool layer: permission boundary at tool call, human-in-loop for destructive actions
+- See `agent-guardrails` skill for the full pattern catalog
+
+---
+
+## Tech Stack
+
+> Replace these defaults with your project's actual stack. If you stick with the methodology defaults, leave as-is.
+
+**Backend / Agents**
+- {LANGUAGE — default: Python (FastAPI) for agent runtime and API}
+- {AGENT_FRAMEWORK — default: AWS Strands for multi-agent orchestration}
+- {LLM_PROVIDER — default: AWS Bedrock with Sonnet 4.6 default, Haiku 4.5 for cheap path, Opus 4.7 for reasoning}
+
+**Frontend**
+- {FRONTEND_FRAMEWORK — default: Next.js 16+ (App Router, Server Components)}
+- {STYLING — default: Tailwind CSS + shadcn/ui}
+- {STATE — default: TanStack Query (server), React Context (app)}
+
+**Infrastructure**
+- {IAC — default: AWS CDK (TypeScript)}
+- {COMPUTE — default: Lambda for sporadic, Fargate for long-running}
+- {EVENTS — default: EventBridge for async events, SQS for queues}
+- {DATA — default: DynamoDB for state, S3 for files, S3 Vectors or Bedrock KB for retrieval}
+- {SECRETS — default: AWS Secrets Manager}
+
+**Observability**
+- {LOGS_METRICS — default: CloudWatch}
+- {TRACING — default: X-Ray}
+- {STRUCTURED_LOGS — default: JSON with request_id, agent_name, latency_ms, tokens_in/out}
+
+**Testing**
+- {UNIT_INTEGRATION — default: pytest (Python), Jest (TypeScript)}
+- {E2E — default: pytest with real Bedrock client, branch-gated}
+- {UI_E2E — default: Playwright (via Playwright MCP when available)}
+
+---
+
+## Coding Conventions
+
+**File organization (agent code, suggested)**
+```
+agents/{agent-name}/
+├── agent.py         # main agent class
+├── tools.py         # agent-specific tools
+├── prompts.py       # prompt templates
+└── validators.py    # input/output validation
+```
+
+**Naming**
+- Agents: `{Purpose}Agent` (e.g., `AnalyzerAgent`)
+- Tools: `{action}_{object}` (e.g., `search_documents`)
+- State keys: `{workflow_id}#{agent_name}#{timestamp}`
+
+**Testing discipline**
+- Unit tests exhaustively cover deterministic logic (parsers, validators, routing)
+- Integration tests cover every workflow with mocked LLMs at the client boundary
+- E2E tests cover only critical paths with real LLMs (cost gate)
+- Assert behavior and types, never exact LLM output strings
+
+**Documentation**
+- ADRs in `ai_docs/decisions/ADR-NNN-{slug}.md` for any meaningful architectural decision
+- Inline comments only for non-obvious WHY, never restating WHAT the code does
+- OpenAPI / Swagger for all HTTP endpoints
+
+---
+
+## Cost Management
+
+**Budget targets** (set per your project)
+- Dev: < ${DEV_BUDGET}/month
+- Staging: < ${STAGING_BUDGET}/month
+- Production: per-agent tracking with alarms on daily spend
+
+**Tactics (see `cost-optimizer` skill for depth)**
+- Model routing per task complexity
+- Provider-side prompt caching for stable system prompts (~90% input discount on cached portion)
+- Application caching for repeated queries (DynamoDB with TTL)
+- Tight `max_tokens` per call site (output tokens dominate cost)
+- Cost telemetry per agent / task / tenant for ongoing optimization
+
+---
+
+## Security Defaults
+
+**Agent surface**
+- Sanitize user input before prompt construction (no raw concatenation)
+- Validate every LLM output against a schema before acting on it
+- Never `exec()` / `eval()` LLM output, even from trusted users
+- Enforce tool permissions at the tool layer, not in the prompt
+
+**API surface**
+- Auth: {AUTH_PROVIDER — e.g., Cognito, Auth0, Supabase Auth}
+- RBAC, permission check per request
+- API Gateway throttling for rate limits
+- CORS whitelist, never `*`
+
+**Infrastructure**
+- Secrets Manager for all secrets (never env vars at build time)
+- VPC config + security groups for any non-public service
+- Encryption at rest and in transit on every data store
+- IAM roles per service, least-privilege
+
+For depth on agent-specific security: `agent-guardrails` skill.
+
+---
+
+## MCP Servers (use when beneficial)
+
+| MCP | When it helps |
+|---|---|
+| **AWS Docs** | Current service capabilities, quotas, IAM patterns, pricing structure. Use in planning, architecture review, optimization. |
+| **Context7** | Current SDK signatures (React, Next.js, Anthropic SDK, FastAPI). Use during implementation, dependency updates. |
+| **Strands Agents** | Strands SDK patterns and current API. Use when working with Strands multi-agent. |
+| **Mermaid Chart** | Validate architecture diagrams before saving. Use in design / review. |
+| **Playwright** | Browser automation for E2E UI tests. Use in testing. |
+| **Fetch** | Pull URL content (competitor sites, reference docs) into the conversation. Use in ideation. |
+
+Templates have a pre-flight MCP check block. Prompts have per-prompt MCP hints. Skills stay tech-agnostic.
+
+---
+
+## Communication & Working Style
+
+**Response shape**
+- Bottom line first, details follow
+- Direct, no preamble or apology
+- Concrete recommendations with one-line rationale
+- Tables and tight bullets over paragraphs
+- No em dashes (use commas, colons, parentheses)
+
+**Decision making**
+- Show trade-offs explicitly (pros / cons / what we give up)
+- Cost-aware (consider budget impact for any LLM-heavy choice)
+- User value > technical elegance
+- Future-proof but don't over-engineer
+
+**When uncertain: ask.** Surface assumptions instead of hiding them. A clarifying question costs seconds; a wrong implementation costs hours.
+
+---
+
+## Quick Start
+
+Starting a new feature or project:
+
+1. **Brief:** paste `templates/optimized/01_brainstorm_brief.md` → fills `ai_docs/brief.md`
+2. **(Optional) Design:** paste `templates/optimized/02a_generate_system_design.md` → fills `ai_docs/design.md`
+3. **(Optional) UI:** paste `templates/optimized/02b_generate_ui_requirements.md` → fills `ai_docs/ui_requirements.md`
+4. **Plan:** paste `templates/optimized/02_generate_implementation_plan.md` → fills `ai_docs/plan.md`
+5. **Tasks:** paste `templates/optimized/03_generate_tasks.md` → fills `ai_docs/tasks/`
+6. **Execute tasks** in fresh Claude Code sessions, using prompts from `sdlc_prompts/` for granular activities
+7. **Document decisions** as ADRs in `ai_docs/decisions/` as you go
+
+---
+
+## Project-specific notes
+
+> Add anything specific to {PROJECT_NAME} below: domain quirks, integrations the team has invested in, decisions that override the defaults above, contact for on-call, etc.
+
+- {NOTE_1}
+- {NOTE_2}
+
+---
+
+*This file is the always-loaded context for Claude Code. Update as the project evolves. For methodology changes (skills, templates, prompts), edit the canonical files in `templates/optimized/`, `sdlc_prompts/`, and `~/.claude/skills/` rather than mutating this file.*
+
+---
+
+## Placeholder index (for copying this template)
+
+When you copy this template to a new project, replace these placeholders:
+
+- `{PROJECT_NAME}` — appears at top and in body
+- `{PROJECT_ONE_LINE_PITCH}` — one-sentence what / why
+- `{PROJECT_TYPE}` — kind of project
+- `{STACK_ONE_LINE}` — one-line stack summary
+- `{ACTIVE_PHASE}` — MVP / production / maintenance
+- `{LANGUAGE}`, `{AGENT_FRAMEWORK}`, `{LLM_PROVIDER}` — backend
+- `{FRONTEND_FRAMEWORK}`, `{STYLING}`, `{STATE}` — frontend
+- `{IAC}`, `{COMPUTE}`, `{EVENTS}`, `{DATA}`, `{SECRETS}` — infra
+- `{LOGS_METRICS}`, `{TRACING}`, `{STRUCTURED_LOGS}` — observability
+- `{UNIT_INTEGRATION}`, `{E2E}`, `{UI_E2E}` — testing
+- `{DEV_BUDGET}`, `{STAGING_BUDGET}` — cost targets
+- `{AUTH_PROVIDER}` — auth
+- `{NOTE_1}`, `{NOTE_2}` — project-specific notes
+
+Delete this Placeholder index section after the first copy. The other sections stay as-is unless your project diverges from methodology defaults.

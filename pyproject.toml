@@ -1,0 +1,45 @@
+[project]
+name = "aicoe-agents"
+version = "0.1.0"
+description = "AI CoE Platform — shared agents library and Lambda handlers"
+readme = "README.md"
+# Lambda runtime targets 3.12 (set in CDK); >=3.12 lets local 3.13/3.14 run the test suite.
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.7",
+    "boto3>=1.34",
+]
+
+[project.optional-dependencies]
+# Strands runtime is only needed when actually running agents (Fargate/Lambda),
+# not for unit-testing the shared lib. Kept optional so the test suite installs lean.
+runtime = [
+    "strands-agents>=0.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "moto[s3]>=5.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agents*"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["agents"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["agents"]
+pythonpath = ["."]

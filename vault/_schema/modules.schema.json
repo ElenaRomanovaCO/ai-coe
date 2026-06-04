@@ -1,0 +1,97 @@
+{
+  "$defs": {
+    "ModuleEntry": {
+      "properties": {
+        "id": {
+          "description": "e.g. \"module-2\"",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "e.g. \"Asset Library\"",
+          "title": "Name",
+          "type": "string"
+        },
+        "wave": {
+          "maximum": 7,
+          "minimum": 1,
+          "title": "Wave",
+          "type": "integer"
+        },
+        "purpose": {
+          "description": "one-line summary",
+          "title": "Purpose",
+          "type": "string"
+        },
+        "when_to_use": {
+          "description": "bullet examples",
+          "items": {
+            "type": "string"
+          },
+          "title": "When To Use",
+          "type": "array"
+        },
+        "example_queries": {
+          "description": "example user phrases that should route here",
+          "items": {
+            "type": "string"
+          },
+          "title": "Example Queries",
+          "type": "array"
+        },
+        "agent_id": {
+          "description": "e.g. \"AGENT-03\"",
+          "title": "Agent Id",
+          "type": "string"
+        },
+        "model_tier": {
+          "enum": [
+            "haiku-4-5",
+            "sonnet-4-6",
+            "opus-4-7"
+          ],
+          "title": "Model Tier",
+          "type": "string"
+        },
+        "worker_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Worker Ids",
+          "type": "array"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "wave",
+        "purpose",
+        "agent_id",
+        "model_tier"
+      ],
+      "title": "ModuleEntry",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "version": {
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "modules": {
+      "items": {
+        "$ref": "#/$defs/ModuleEntry"
+      },
+      "title": "Modules",
+      "type": "array"
+    }
+  },
+  "title": "ModuleRegistry",
+  "type": "object"
+}
