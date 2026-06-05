@@ -12,7 +12,7 @@
 - **Project:** AI CoE Platform
 - **One-line pitch:** Internal platform for consultants at AI-focused IT consulting firms, hierarchical multi-agent system over a markdown knowledge base, covering all 27 modules from the north-star vision.
 - **Architecture pattern:** Hybrid agent pipeline + serverless event-driven. Fargate-hosted orchestrator (warm, low-latency), Lambda-hosted module agents and task workers (cold-startable, cheap), S3-backed content substrate, S3 Vectors for retrieval.
-- **Stack:** Foundation: AWS Bedrock + Strands Agents + S3 + S3 Vectors. Extensions: Next.js 16 frontend on Vercel, AWS Lambda + Fargate for compute, CDK Python for IaC.
+- **Stack:** Foundation: AWS Bedrock + Strands Agents + S3 + S3 Vectors. Extensions: Next.js 16 frontend on AWS Amplify Hosting Gen 2, AWS Lambda + Fargate for compute, CDK Python for IaC.
 - **Solo or team:** solo
 
 ---
@@ -31,8 +31,8 @@
 
 - **Context:** Next.js server actions need to invoke Strands agents. Strands is Python, Next.js is Node. Options were direct Lambda invoke (AWS SDK from server action), API Gateway + Lambda, or FastAPI service in front of Strands.
 - **Chose:** Next.js server actions invoke Lambda directly via AWS SDK (lambda:Invoke).
-- **Reason:** Saves API Gateway cost and one network hop (~50-100ms). FastAPI adds a moving part with no value at demo scale. Vercel server actions support direct AWS SDK calls with IAM credentials via OIDC federation.
-- **Trade-off accepted:** No HTTP-layer caching, no WAF, no Lambda function URL public surface. All access goes through Vercel server actions (server-side, behind app password gate). Cannot easily expose agent endpoints to mobile apps or third parties post-demo. Captured as a post-demo concern.
+- **Reason:** Saves API Gateway cost and one network hop (~50-100ms). FastAPI adds a moving part with no value at demo scale. Amplify-hosted Next.js server actions run on Amplify's SSR Lambda with an attached IAM execution role, so AWS SDK calls authenticate natively, no OIDC federation needed.
+- **Trade-off accepted:** No HTTP-layer caching, no WAF, no Lambda function URL public surface. All access goes through Amplify-hosted Next.js server actions (server-side, behind app password gate). Cannot easily expose agent endpoints to mobile apps or third parties post-demo. Captured as a post-demo concern.
 - **Revisit when:** mobile app needed, OR public API surface needed, OR WAF/rate-limit becomes a real requirement (multi-tenant).
 
 ### AD-03: Module registry format
@@ -63,7 +63,7 @@ graph TB
     ModulePages["27 Module Pages<br/>Asset Library, Assessment, Kit Builder, ..."]
   end
 
-  subgraph App["Application Layer (Vercel)"]
+  subgraph App["Application Layer (AWS Amplify Hosting Gen 2)"]
     NextApp["Next.js 16 App Router<br/>SSR + Server Actions"]
     AuthGate["Password Gate Middleware<br/>(env var compare)"]
     LocalStorage["Browser localStorage<br/>display_name + auth_flag"]
@@ -170,7 +170,7 @@ graph TB
   - Responsibilities: render module pages, persistent chat dock, asset rendering, kit preview
   - Owns: FR-002, FR-003, FR-010 to FR-015, FR-018, FR-022 to FR-024, all UI-bound FRs
   - Depends on: Next.js server actions
-  - Deployment target: Vercel (CDN)
+  - Deployment target: AWS Amplify Hosting Gen 2 (CDN via CloudFront, included)
   - Notes: localStorage holds display_name + auth_flag
 
 - **Next.js Server Actions Layer**
@@ -178,8 +178,8 @@ graph TB
   - Responsibilities: password gate, IAM-signed AWS calls (lambda:Invoke, s3:GetObject for static reads), session management, request shaping for the orchestrator
   - Owns: FR-001, request routing for all module FRs
   - Depends on: Chat Orchestrator (Fargate), S3 Sessions + Users Bucket, S3 Vault Bucket (for read-only renders)
-  - Deployment target: Vercel
-  - Notes: Vercel-AWS IAM federation via OIDC, no long-lived AWS credentials in Vercel env
+  - Deployment target: AWS Amplify Hosting Gen 2 (SSR runs on Amplify's managed Lambda)
+  - Notes: IAM execution role attached directly to the Amplify SSR compute, no federation needed; no long-lived credentials anywhere
 
 - **AGENT-01: Chat Orchestrator**
   - Type: strands-agent (Fargate)
@@ -659,7 +659,7 @@ graph TB
 - **No Cognito (demo)** - per Q1 decision, single shared password. Migration planned in post-demo-plan.md Section 1.
 - **No multi-region or DR** - per brief NFR-005, single AZ in us-east-1. Snapshot-based RPO of 24h.
 - **No VPC** - Lambdas run in default no-VPC; saves NAT Gateway cost ($30-50/month).
-- **No CloudFront in front of Vercel** - Vercel CDN is included; double-CDN would not help.
+- **No additional CloudFront distribution** - Amplify Hosting already includes CloudFront as its CDN. Adding another would not help.
 - **No per-agent Lambda functions** (44 Lambdas) - per AD-01, two Lambdas (modules + workers) with internal Strands routing. Single deploy artifact per layer.
 - **No provisioned concurrency on Lambda** - only Fargate stays warm. Module/worker Lambdas cold-start during streaming response, invisible to user.
 - **No live data ingestion for Feed/Compliance** - per Q3, seeded data only for demo. Real ingestion in post-demo-plan.md Section 3.
@@ -700,8 +700,8 @@ graph TB
 - **Re-embedding cost at scale** - re-embedding all changed files via Titan Embed v2 has cost; if the curator does bulk imports, this can spike.
   - Mitigation: hash-based dedup; chunked embeddings; daily embedding cost alarm at $1.
 
-- **Vercel-to-AWS IAM federation** - OIDC federation between Vercel and AWS IAM is supported but requires careful trust policy setup. Misconfiguration could either block legitimate calls or grant excessive permissions.
-  - Mitigation: use AWS-provided IAM role templates for Vercel federation; scope IAM policy to lambda:Invoke on a specific function ARN.
+- **Amplify SSR IAM role scoping** - Amplify Gen 2 attaches an IAM execution role to the SSR Lambda. Misconfigured permissions could either block legitimate Lambda invocations or grant excessive access.
+  - Mitigation: define the role explicitly in CDK; scope to lambda:Invoke on a specific function ARN and nothing else; no S3 or Bedrock direct access from Amplify SSR.
 
 ### 8.3 Smart Decisions (risk reducers)
 
@@ -735,7 +735,7 @@ graph TB
 - **Q-06:** S3 Vectors index partitioning. One index per content type (assets, regs, decisions, ...) or single index with metadata filter? Default: one index per content type for clean isolation.
   - Needs decision by: Wave 1 start
 
-- **Q-07:** Confirm Fargate ALB / endpoint pattern. Options: Fargate behind internal ALB invoked via Lambda URL → ALB, OR Fargate exposed via Cloud Map service discovery to Lambda. Default: Fargate behind internal ALB, Vercel calls ALB via signed AWS request.
+- **Q-07:** Confirm Fargate ALB / endpoint pattern. Options: Fargate behind internal ALB invoked via proxy Lambda → ALB, OR Fargate exposed via Cloud Map service discovery to Lambda. Default: Fargate behind internal ALB, Amplify SSR Lambda calls a proxy Lambda which forwards to ALB.
   - Needs decision by: plan stage
 
 - **Q-08:** Daily Opus dollar cap value (Module 27). Brief Q-05 deferred this. Proposed default: $5/day hard cap.
@@ -765,7 +765,7 @@ graph TB
 - Every INT-NN has an integration point: yes, INT-01 (Bedrock), INT-02 (S3), INT-03 (S3 Vectors) all shown in the diagram and Component Inventory.
 - Every critical NFR has an architectural answer:
   - NFR-001 (chat first-token <3s): answered by AD-01 (Fargate warm orchestrator)
-  - NFR-002 (LCP <3s): answered by Vercel CDN + SSR
+  - NFR-002 (LCP <3s): answered by Amplify Hosting CDN (CloudFront) + SSR
   - NFR-004 (re-embed <60s): answered by EventBridge → Lambda pipeline
   - NFR-005 (cost <$50/month): answered by no-DynamoDB, no-API-Gateway, no-VPC choices
   - NFR-006 (per-Opus call <$1): answered by daily Opus cap pattern
@@ -774,7 +774,7 @@ graph TB
 
 - **Components I might be under-spec'ing:**
   - Streaming through 3 layers (Fargate → Lambda → Lambda) is not explicitly diagrammed end-to-end; Q-04 captures it but the actual streaming implementation deserves more design rigor at plan stage.
-  - The "lambda:Invoke from Next.js server action" pattern assumes Vercel-AWS OIDC federation works smoothly with edge runtime constraints; needs validation at plan stage (Q on whether server actions run on edge or Node runtime).
+  - The "lambda:Invoke from Next.js server action" pattern assumes Amplify Gen 2 SSR runtime supports AWS SDK v3 calls cleanly with the attached IAM role; well-supported pattern, low risk.
 - **Components that are secretly two components:**
   - ModuleAgentsLambda holding 26 agents in one Lambda is convenient but means deploy-of-one means deploy-of-all. If one module needs different memory/timeout, it forces a split. Acceptable for demo; flagged for post-demo.
   - The S3 Vault Bucket is doing many jobs (content store + agent input + assessment output + kit output + audit log). One bucket is fine but if Object Lock or different lifecycle policies are needed per use case, this needs splitting.
@@ -782,7 +782,7 @@ graph TB
   - Bedrock Guardrails on AGENT-01: arguably not needed for a demo with no real users. Cost saving is small; keeping it for credibility of demo to security-minded prospects.
   - CloudWatch Alarms: could be replaced with just CloudWatch dashboards; keep alarms because cost discipline matters more than alarm-deletion savings.
 - **Decisions I made that should arguably go the other way:**
-  - AD-02 (no API Gateway) saves cost but means Vercel-to-AWS auth setup is more bespoke. If Vercel-AWS OIDC federation is painful, falling back to API Gateway + Lambda Function URL would be ~$10-15/month and simpler. Plan stage should benchmark setup time before committing.
+  - AD-02 (no API Gateway) is cleaner now that Amplify is in-account: the SSR Lambda's IAM role calls the proxy Lambda directly. Fallback to API Gateway + Lambda Function URL remains an option (~$10-15/month) if WAF or public-API needs emerge.
   - AD-04 (no DynamoDB) is a strong default but loses concurrent-write safety. If two browser tabs from the same user send simultaneous chat requests, the session JSON could lose writes. Demo single-user pattern makes this unlikely but the failure mode is silent.
 
 **Disagreements with the brief:**

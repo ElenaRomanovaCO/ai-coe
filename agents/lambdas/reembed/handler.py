@@ -179,19 +179,23 @@ class ReEmbedder:
         vectors = []
         for ch in chunks:
             embedding = self._embed(ch.text)
+            metadata = {
+                "file_path": key,
+                "content_type": ctype,
+                "frontmatter_id": fm_id,
+                "chunk_index": ch.index,
+                "updated_at": updated_at,
+                "content_hash": content_hash,
+                "heading_path": " > ".join(ch.heading_path),
+            }
+            # S3 Vectors rejects null metadata values; omit absent fields
+            # (e.g. frontmatter_id when a file has no YAML frontmatter).
+            metadata = {k: v for k, v in metadata.items() if v is not None}
             vectors.append(
                 {
                     "key": f"{key}#{ch.index}",
                     "data": {"float32": embedding},
-                    "metadata": {
-                        "file_path": key,
-                        "content_type": ctype,
-                        "frontmatter_id": fm_id,
-                        "chunk_index": ch.index,
-                        "updated_at": updated_at,
-                        "content_hash": content_hash,
-                        "heading_path": " > ".join(ch.heading_path),
-                    },
+                    "metadata": metadata,
                 }
             )
 

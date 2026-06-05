@@ -42,7 +42,7 @@ Cross-cutting substrate. Everything else depends on this.
 |---|---|---|---|---|
 | 00 | [00_foundation.md](./00_foundation.md) | FR-001, FR-004, FR-005 (substrate); IAM / observability / CI/CD / cost cap / shared lib | none | ☐ |
 
-**Phase 0 acceptance:** Vercel preview reachable, password gate works, ReEmbed pipeline indexes new vault files within 60s, all 5 IAM roles created, modules.json + agents.md exist, CloudWatch alarms in place.
+**Phase 0 acceptance:** Amplify Hosting preview reachable, password gate works, ReEmbed pipeline indexes new vault files within 60s, all 5 IAM roles created, modules.json + agents.md exist, CloudWatch alarms in place.
 
 ---
 

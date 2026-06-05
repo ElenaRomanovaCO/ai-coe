@@ -149,7 +149,7 @@
   - S3 cross-region replication for the Knowledge Base bucket
   - S3 Vectors: replicate the vector index (manual re-embed in DR region as backup)
   - Add a us-west-2 DR stack via CDK (parameterized region)
-  - Vercel: configure custom domain with failover DNS
+  - Amplify: configure custom domain with multi-region failover DNS (Route 53)
 - **Effort:** ~1 week
 - **Dependencies:** none
 

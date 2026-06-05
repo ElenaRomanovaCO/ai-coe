@@ -12,6 +12,7 @@ import aws_cdk as cdk
 
 from stacks.config import REGION
 from stacks.events import EventsStack
+from stacks.frontend import FrontendStack
 from stacks.guardrails import GuardrailsStack
 from stacks.iam import IamStack
 from stacks.observability import ObservabilityStack
@@ -44,6 +45,13 @@ ObservabilityStack(
     app,
     "AiCoE-Observability",
     alarm_email=app.node.try_get_context("alarm_email"),
+    env=env,
+)
+
+FrontendStack(
+    app,
+    "AiCoE-Frontend",
+    ssr_role=iam_stack.amplify_ssr_role,
     env=env,
 )
 

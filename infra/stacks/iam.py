@@ -164,29 +164,30 @@ class IamStack(Stack):
             )
         )
 
-        # --- Vercel OIDC ---------------------------------------------------
-        issuer = self.node.try_get_context("vercel_oidc_issuer") or "oidc.vercel.com"
-        audience = self.node.try_get_context("vercel_oidc_audience") or "https://vercel.com"
-        sub = (
-            self.node.try_get_context("vercel_oidc_sub")
-            or "owner:ACME:project:aicoe:environment:preview"
-        )
-        provider_arn = f"arn:aws:iam::{account}:oidc-provider/{issuer}"
-        self.vercel_role = iam.Role(
+        # --- Amplify SSR compute role -------------------------------------
+        # Attached to the Next.js SSR Lambda(s) Amplify Hosting (Gen 2) creates.
+        # The compute service assumes this role at runtime, so server actions can
+        # call AWS directly with no static keys and no AssumeRole step.
+        self.amplify_ssr_role = iam.Role(
             self,
-            "VercelOidcRole",
-            role_name="aicoe-vercel-oidc-role",
-            assumed_by=iam.FederatedPrincipal(
-                provider_arn,
-                conditions={
-                    "StringEquals": {f"{issuer}:aud": audience, f"{issuer}:sub": sub},
-                },
-                assume_role_action="sts:AssumeRoleWithWebIdentity",
-            ),
+            "AmplifySsrRole",
+            role_name="aicoe-amplify-ssr-role",
+            assumed_by=iam.ServicePrincipal("amplify.amazonaws.com"),
         )
-        # Frontend may only invoke the orchestrator endpoint Lambda — no S3, no Bedrock.
-        self.vercel_role.add_to_policy(
+        # Frontend may only invoke the orchestrator endpoint Lambda — no S3,
+        # no Bedrock, no S3 Vectors.
+        self.amplify_ssr_role.add_to_policy(
             iam.PolicyStatement(
-                actions=["lambda:InvokeFunction"], resources=[fn_arn(ORCHESTRATOR_ENDPOINT_FN)]
+                actions=["lambda:InvokeFunction", "lambda:InvokeWithResponseStream"],
+                resources=[fn_arn(ORCHESTRATOR_ENDPOINT_FN)],
+            )
+        )
+        # Amplify manages the SSR compute log groups under /aws/amplify/.
+        self.amplify_ssr_role.add_to_policy(
+            iam.PolicyStatement(
+                actions=["logs:CreateLogStream", "logs:PutLogEvents"],
+                resources=[
+                    f"arn:aws:logs:{config.REGION}:{account}:log-group:/aws/amplify/*"
+                ],
             )
         )

@@ -14,22 +14,22 @@
 
 > *Use this if your Claude Code session already has `ai_docs/brief.md` and `ai_docs/design.md` in context.*
 
-**Goal:** Stand up every shared substrate piece (AWS account prep, CDK app, S3, IAM, Vercel + AWS OIDC, password gate, re-embed pipeline, observability, CI/CD, devex) so that subsequent wave tasks can focus on module-specific work only.
+**Goal:** Stand up every shared substrate piece (AWS account prep, CDK app, S3, IAM, AWS Amplify Hosting Gen 2, password gate, re-embed pipeline, observability, CI/CD, devex) so that subsequent wave tasks can focus on module-specific work only.
 
 **Build steps:**
 
 1. **AWS account prep** → Verify: `aws bedrock list-foundation-models --region us-east-1` returns Claude Sonnet 4.6, Haiku 4.5, Opus 4.7, Titan Embed v2 with `inferenceTypesSupported` including `ON_DEMAND`.
 2. **CDK Python project bootstrap** (`infra/`) → Verify: `cdk synth` succeeds with empty stacks.
 3. **Storage stack** (S3 vault bucket + S3 sessions bucket + S3 Vectors index) → Verify: `aws s3 ls` shows buckets; `aws s3vectors list-indexes` shows index.
-4. **IAM stack** (5 roles: Fargate orchestrator, ModuleAgents Lambda, Workers Lambda, ReEmbed Lambda, Vercel-OIDC) → Verify: roles created; `aws iam get-role` returns expected trust policy for each.
+4. **IAM stack** (5 roles: Fargate orchestrator, ModuleAgents Lambda, Workers Lambda, ReEmbed Lambda, Amplify SSR) → Verify: roles created; `aws iam get-role` returns expected trust policy for each.
 5. **ReEmbed Lambda + EventBridge wiring** → Verify: drop a test .md into vault bucket, `aws s3vectors query-vectors` returns the file content within 60s.
 6. **modules.json schema + initial file** → Verify: Pydantic loader validates the seeded `vault/modules.json` (empty `modules: []` is valid).
 7. **agents.md initial file** → Verify: file exists at `vault/agents.md` with a minimal "you are the Chat orchestrator" outline.
 8. **Bedrock Guardrails policy** (PII + prompt attack) → Verify: `aws bedrock get-guardrail --guardrail-identifier {id}` returns ACTIVE.
 9. **Next.js 16 project bootstrap** (`web/`) + Tailwind + shadcn/ui → Verify: `pnpm dev` boots and lands on a placeholder authenticated dashboard route.
 10. **Password gate middleware + localStorage display_name flow** → Verify: wrong password blocks all routes; correct password + display name persists across reloads.
-11. **Vercel-AWS OIDC federation** → Verify: Vercel preview deploy can call `lambda:Invoke` on a no-op test Lambda using IAM role assumed via OIDC, no static AWS keys in Vercel env.
-12. **CI/CD pipeline** (GitHub Actions: lint, test, CDK synth, CDK deploy with manual approval, Vercel auto-deploy) → Verify: PR triggers full lint+test+synth; merging to main triggers deploy.
+11. **Amplify Hosting Gen 2 app + SSR IAM role** → Verify: Amplify app provisioned, connected to the GitHub repo, branch deploy succeeds; SSR Lambda can call `lambda:Invoke` on a no-op test Lambda using its attached IAM role; no AWS keys anywhere in the Amplify app config.
+12. **CI/CD pipeline** (GitHub Actions: lint, test, CDK synth, CDK deploy with manual approval. Amplify auto-deploys the Next.js app on push to main via its native git integration) → Verify: PR triggers full lint+test+synth; merging to main triggers CDK deploy gate + Amplify build.
 13. **Observability conventions** (structured log schema, metric names, CloudWatch log groups per service, alarm: daily cost > $5) → Verify: a manual Lambda invoke emits a log line with the required JSON shape and a CloudWatch metric counter increments.
 14. **Daily Opus cost cap mechanism** (S3-backed counter at `usage/{yyyy-mm-dd}/opus.json`) → Verify: cap library reads + increments correctly; second call after cap hit raises CapExceeded.
 15. **Shared Python agents lib** (`agents/lib/`, base agent class, common tools, model client wrappers) → Verify: `pytest agents/lib/tests/` passes with stub coverage.
@@ -63,7 +63,7 @@
 - `vault/_schema/modules.schema.json` — JSON schema for modules.json
 - `.github/workflows/ci.yml` — lint + test + synth
 - `.github/workflows/deploy-dev.yml` — manual-trigger CDK deploy
-- `.github/workflows/deploy-vercel.yml` — Vercel deploy on main
+- `amplify.yml` — Amplify build spec (build command, env, artifacts)
 - `pyproject.toml` — Python dependencies (uv)
 - `web/package.json` — Next.js + Tailwind + shadcn deps
 - `README.md` — local dev + deploy runbook
@@ -75,7 +75,7 @@
 - [ ] FR-005 verified (editing agents.md affects next chat turn — verified later in task 02; here we only verify the file is read at startup and reload happens on a configurable interval)
 - [ ] All 5 IAM roles created with least-privilege policies
 - [ ] CDK can `synth` + `deploy` to a dev AWS account
-- [ ] Vercel preview deploy reaches a working dashboard placeholder after password entry
+- [ ] Amplify branch preview deploy reaches a working dashboard placeholder after password entry
 - [ ] CI pipeline green on a no-op PR
 - [ ] Cost alarm fires on test (manually simulate by adjusting threshold to $0.01)
 - [ ] All file paths from "Files to create/edit" exist
@@ -98,7 +98,7 @@ You are implementing the **Foundation** (Phase 0) of the **AI CoE Platform**, an
 - **Tech stack:**
   - Backend / Agents: Python 3.12, AWS Strands Agents, Pydantic v2
   - Agent runtime: 1 Fargate Spot task (orchestrator) + 2 Lambdas (module agents, task workers) + 1 Lambda (re-embed)
-  - Frontend: Next.js 16 (App Router), Tailwind CSS, shadcn/ui, deployed to Vercel
+  - Frontend: Next.js 16 (App Router), Tailwind CSS, shadcn/ui, deployed to AWS Amplify Hosting Gen 2
   - LLM: AWS Bedrock (Sonnet 4.6 default, Haiku 4.5 cheap, Opus 4.7 for code only). Embeddings: Titan Embed v2.
   - Content/state: S3 (vault bucket + sessions bucket) + S3 Vectors. No DynamoDB. No Postgres.
   - IaC: AWS CDK (Python). CI/CD: GitHub Actions.
@@ -127,7 +127,7 @@ You are implementing the **Foundation** (Phase 0) of the **AI CoE Platform**, an
 #### Architecture context (where this task sits)
 
 ```
-   Browser ─→ Next.js (Vercel) ─→ [password gate middleware]
+   Browser ─→ Next.js (AWS Amplify SSR) ─→ [password gate middleware]
                                        │
                                        ├─→ (built later: lambda:Invoke to Fargate ALB)
                                        │
@@ -135,7 +135,7 @@ You are implementing the **Foundation** (Phase 0) of the **AI CoE Platform**, an
                                                                        │
                                                                        └──> CloudWatch logs/metrics
 
-   IAM roles (5):  Fargate, ModuleAgents Lambda, Workers Lambda, ReEmbed Lambda, Vercel-OIDC
+   IAM roles (5):  Fargate, ModuleAgents Lambda, Workers Lambda, ReEmbed Lambda, Amplify-SSR
    Bedrock Guardrail policy (PII + prompt attack)  ─→ attached to orchestrator (built in task 02)
 ```
 
@@ -260,11 +260,13 @@ ROLE: aicoe-reembed-lambda-role
     - cloudwatch:PutMetricData
     - logs:* on the function's log group
 
-ROLE: aicoe-vercel-oidc-role
-  Trusted by: token.actions.githubusercontent.com via OIDC (sub claim matches Vercel project)
+ROLE: aicoe-amplify-ssr-role
+  Trusted by: amplify.amazonaws.com (Amplify Hosting SSR compute service)
+  Attached to: the Next.js SSR Lambda(s) that Amplify creates for the app
   Permissions:
-    - lambda:InvokeFunction on aicoe-fargate-orchestrator-endpoint-lambda (or ALB invoke)
-    - NO direct S3, NO direct Bedrock
+    - lambda:InvokeFunction (and lambda:InvokeWithResponseStream) on aicoe-orchestrator-proxy-lambda ARN only
+    - logs:CreateLogStream, logs:PutLogEvents on Amplify's managed log groups
+    - NO direct S3, NO direct Bedrock, NO direct S3 Vectors
 ```
 
 #### Observability conventions (every subsequent task references these)
@@ -348,7 +350,7 @@ Before any Opus invocation:
 
 2. **CDK Python project bootstrap**
    - Files: `infra/app.py`, `infra/cdk.json`, `infra/requirements.txt`, `infra/stacks/__init__.py`
-   - Steps: `uv init infra/`, `uv add aws-cdk-lib constructs`, `cdk init app --language python` (or equivalent). Create one stack per concern: `storage`, `iam`, `events`, `observability`, `guardrails`, `agents` (placeholder), `frontend` (placeholder — Vercel is outside CDK).
+   - Steps: `uv init infra/`, `uv add aws-cdk-lib constructs`, `cdk init app --language python` (or equivalent). Create one stack per concern: `storage`, `iam`, `events`, `observability`, `guardrails`, `agents` (placeholder), `frontend` (Amplify app + branch + IAM role for SSR; use `aws-cdk-lib.aws_amplify` L1 constructs OR provision the Amplify app via the AWS console and reference its ARN from CDK).
    - Verify: `cd infra && uv run cdk synth` succeeds.
 
 3. **Storage stack**
@@ -391,15 +393,21 @@ Before any Opus invocation:
     - Steps: middleware checks for an `auth_ok` cookie (HttpOnly) set after correct password entry. Login page accepts password (env var `APP_PASSWORD`) and display name; on success sets the cookie and writes display name to localStorage; redirects to `/dashboard`. Logout clears both.
     - Verify: visit `/dashboard` without auth → redirected to `/login`. Enter wrong password → stay on login with error. Enter correct password + name → land on dashboard. Refresh → still on dashboard. Display name visible in header.
 
-11. **Vercel-AWS OIDC federation**
-    - Files: `infra/stacks/iam.py` (add Vercel role), `web/lib/aws.ts`, `.github/workflows/deploy-vercel.yml`
-    - Steps: follow Vercel's AWS OIDC integration setup. Create the `aicoe-vercel-oidc-role` with a trust policy keyed to the Vercel project's OIDC issuer + sub claim. In `web/lib/aws.ts`, build a helper that calls `AssumeRoleWithWebIdentity` then invokes a target Lambda. Add a no-op `aicoe-test-lambda` for verification.
-    - Verify: deploy to Vercel preview. From a server action, call the test Lambda. Confirm CloudWatch logs show the invoke. No AWS access keys in Vercel env vars (only the role ARN and region).
+11. **Amplify Hosting Gen 2 app + SSR IAM role**
+    - Files: `infra/stacks/iam.py` (add Amplify SSR role), `infra/stacks/frontend.py` (Amplify app + branch + role attachment), `web/lib/aws.ts`, `amplify.yml`
+    - Steps:
+      1. Create an Amplify Hosting Gen 2 app, connect to the GitHub repo (`web/` subdir as the app root).
+      2. Create branch `main` with SSR enabled (App Router + Server Actions).
+      3. Define `aicoe-amplify-ssr-role` per the IAM conventions; attach as the compute IAM role on the Amplify branch.
+      4. In `web/lib/aws.ts`, build a helper that uses `@aws-sdk/client-lambda` directly (no AssumeRole needed because the SSR Lambda already runs with the role attached).
+      5. Add a no-op `aicoe-test-lambda` for verification.
+      6. Configure `amplify.yml` with `pnpm install --frozen-lockfile && pnpm build` and artifact path `.next/`.
+    - Verify: trigger an Amplify branch deploy. From a server action on the deployed URL, call the test Lambda. Confirm CloudWatch logs show the invoke. No AWS access keys in Amplify env (only standard runtime).
 
 12. **CI/CD pipeline**
-    - Files: `.github/workflows/ci.yml`, `.github/workflows/deploy-dev.yml`, `.github/workflows/deploy-vercel.yml`
-    - Steps: `ci.yml` runs on PRs: pnpm lint, pnpm test, uv run ruff check, uv run pytest, uv run cdk synth. `deploy-dev.yml` is manual-trigger: assumes dev AWS role, runs `cdk deploy --all --require-approval never` (acceptable for solo demo only). `deploy-vercel.yml` deploys frontend on merges to main (Vercel CLI or git integration).
-    - Verify: open a no-op PR; all CI checks green. Manually trigger deploy-dev; CDK deploys cleanly. Merge to main; Vercel auto-deploys.
+    - Files: `.github/workflows/ci.yml`, `.github/workflows/deploy-dev.yml`, `amplify.yml`
+    - Steps: `ci.yml` runs on PRs: pnpm lint, pnpm test, uv run ruff check, uv run pytest, uv run cdk synth. `deploy-dev.yml` is manual-trigger: assumes dev AWS role, runs `cdk deploy --all --require-approval never` (acceptable for solo demo only). Amplify auto-deploys the Next.js app on merges to main via its native git integration (no GitHub Actions job needed for the frontend).
+    - Verify: open a no-op PR; all CI checks green. Manually trigger deploy-dev; CDK deploys cleanly. Merge to main; Amplify build kicks off automatically and the new version is live in 3-5 minutes.
 
 13. **Observability conventions**
     - Files: `agents/lib/logging.py`, `agents/lib/metrics.py`, `infra/stacks/observability.py`
@@ -423,10 +431,10 @@ Before any Opus invocation:
 - [ ] FR-005 partial: agents.md file exists and is readable from vault bucket (full verification in task 02)
 - [ ] All 5 IAM roles created with least-privilege policies
 - [ ] CDK `synth` and `deploy --all` succeed against dev account
-- [ ] Vercel preview deploy reaches dashboard placeholder after password
+- [ ] Amplify branch preview deploy reaches dashboard placeholder after password
 - [ ] CI green on no-op PR
 - [ ] Manual smoke test passes:
-  - Visit Vercel preview URL → land on login
+  - Visit Amplify branch URL → land on login
   - Enter correct password + name → land on dashboard
   - Drop a test markdown file into vault bucket → wait 60s → query S3 Vectors and confirm retrieval
   - Visit CloudWatch console → confirm log group + metric exist + alarm visible
@@ -485,4 +493,5 @@ Track decisions and questions during implementation:
 - AWS Strands Agents: https://strandsagents.com
 - AWS Bedrock model IDs: confirm at implementation time
 - AWS S3 Vectors: confirm SDK signatures at implementation time
-- Vercel-AWS OIDC federation: Vercel official guide
+- AWS Amplify Hosting Gen 2 with Next.js 16 (App Router + Server Actions): AWS Amplify docs
+- aws-cdk-lib `aws_amplify` constructs reference

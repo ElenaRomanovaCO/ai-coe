@@ -520,7 +520,7 @@ Module registry lives at `vault/modules.json`. Chat reads it on every conversati
 - **Embedding model:** Bedrock Titan Embed v2 (1024 dimensions).
 - **Cache:** none in this version (cost discipline; demo latency acceptable).
 - **Object storage:** single S3 bucket with prefixed folders (`vault/`, `sessions/`, `users/`, `kits/`).
-- **Secrets:** AWS Secrets Manager for Bedrock API keys (if needed beyond IAM), Vercel deploy hook tokens. Shared app password in Vercel/Lambda env var (acceptable for demo per scope decision).
+- **Secrets:** AWS Secrets Manager for Bedrock API keys (if needed beyond IAM), Amplify build tokens. Shared app password in Amplify env / Lambda env var (acceptable for demo per scope decision).
 
 ### 7.3 State & Session Management
 
@@ -642,7 +642,7 @@ Module registry lives at `vault/modules.json`. Chat reads it on every conversati
 
 - **Storage:** AWS Secrets Manager for any non-IAM secret. Env vars for app password and feature flags.
 - **Rotation policy:** none (demo).
-- **Access:** Lambda execution role + Vercel deploy token. Minimal IAM policies per service.
+- **Access:** Lambda execution role + Amplify build role. Minimal IAM policies per service.
 
 ---
 
@@ -712,7 +712,7 @@ Module registry lives at `vault/modules.json`. Chat reads it on every conversati
 - EventBridge: S3 file-change events → re-embedding Lambda
 - Secrets Manager: any non-env secrets
 - CloudWatch: logs, metrics, alarms
-- Vercel: Next.js hosting (free tier)
+- AWS Amplify Hosting (Gen 2): Next.js hosting + CDN + SSR compute
 
 ### 12.5 Dev Tooling
 
@@ -728,7 +728,7 @@ Module registry lives at `vault/modules.json`. Chat reads it on every conversati
 ### 13.1 Environments
 
 - **Dev:** local Next.js + local Strands agents calling real Bedrock. Local S3 mock (LocalStack optional, real S3 dev bucket preferred).
-- **Demo:** Vercel (Next.js) + AWS (everything else) in us-east-1, single environment.
+- **Demo:** AWS Amplify (Next.js SSR + CDN) + AWS (everything else) in us-east-1, single AWS account, single environment.
 - **No staging, no prod** (demo only).
 
 ### 13.2 IaC
@@ -739,7 +739,7 @@ Module registry lives at `vault/modules.json`. Chat reads it on every conversati
 ### 13.3 CI/CD
 
 - **Platform:** GitHub Actions
-- **Pipeline:** push → lint → tests → CDK synth → CDK deploy (manual approval) → Vercel deploy (auto from main)
+- **Pipeline:** push → lint → tests → CDK synth → CDK deploy (manual approval). Amplify auto-deploys the Next.js app from main branch via Amplify's native git integration.
 - **Deploy strategy:** in-place updates (no blue-green for demo)
 
 ### 13.4 Region & Network
@@ -860,7 +860,7 @@ Per-wave additional DoD lives in plan.md.
 
 - **RISK-04:** Minimal security is intentional but creates a hard "do not expose publicly" constraint.
   - Likelihood: high | Impact: medium (only if violated)
-  - Mitigation: Vercel password protection at the platform level + app-level password gate. No public DNS for AWS resources. Acknowledged in deploy runbook.
+  - Mitigation: Amplify basic-auth at the platform level + app-level password gate. No public DNS for AWS resources. Acknowledged in deploy runbook.
 
 - **RISK-05:** Cost overrun from heavy Opus use in Module 27.
   - Likelihood: medium | Impact: medium

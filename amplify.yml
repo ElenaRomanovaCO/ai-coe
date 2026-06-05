@@ -1,0 +1,22 @@
+version: 1
+# Monorepo build spec: the Next.js app lives in web/. Amplify Hosting (Gen 2)
+# detects SSR (App Router + Server Actions) and deploys the compute build.
+applications:
+  - appRoot: web
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - corepack enable
+            - pnpm install --frozen-lockfile
+        build:
+          commands:
+            - pnpm build
+      artifacts:
+        baseDirectory: .next
+        files:
+          - "**/*"
+      cache:
+        paths:
+          - .next/cache/**/*
+          - node_modules/**/*

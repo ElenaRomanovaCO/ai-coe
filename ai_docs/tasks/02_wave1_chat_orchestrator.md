@@ -72,7 +72,7 @@ You are implementing **AGENT-01 (Chat Orchestrator)**, the Layer 1 front-door ag
 - Per AD-02, Next.js server actions invoke a thin proxy Lambda (response-streaming) via AWS SDK. Proxy forwards to Fargate internal ALB. No API Gateway, no FastAPI service exposed publicly.
 - Per AD-03, the module registry is `vault/modules.json` (single file). Orchestrator hot-reloads it every 60s.
 - Per AD-04, session state is JSON in S3 at `sessions/{display_name}/{session_id}.json`.
-- Foundation (task 00) provides: 5 IAM roles, S3 vault + sessions buckets, S3 Vectors index `aicoe-content`, Bedrock Guardrails policy ARN, ReEmbed Lambda, Vercel-AWS OIDC, observability conventions (log shape + metrics + alarms), shared agents lib at `agents/lib/`.
+- Foundation (task 00) provides: 5 IAM roles, S3 vault + sessions buckets, S3 Vectors index `aicoe-content`, Bedrock Guardrails policy ARN, ReEmbed Lambda, Amplify Hosting Gen 2 app with SSR IAM role, observability conventions (log shape + metrics + alarms), shared agents lib at `agents/lib/`.
 
 #### What you are building
 
@@ -180,7 +180,7 @@ aicoe-proxy-lambda-role (NEW, but follows same pattern):
   - logs:* on its log group
   - cloudwatch:PutMetricData
 
-aicoe-vercel-oidc-role:
+aicoe-amplify-ssr-role:
   - Add: lambda:InvokeFunctionUrl OR lambda:InvokeWithResponseStream on aicoe-orchestrator-proxy ARN
 ```
 

@@ -17,7 +17,7 @@ uv.lock
 node_modules/
 web/.next/
 web/out/
-web/.vercel/
+.amplify-hosting/
 *.tsbuildinfo
 pnpm-debug.log*
 
