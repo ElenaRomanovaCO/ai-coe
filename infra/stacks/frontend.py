@@ -58,8 +58,13 @@ class FrontendStack(Stack):
                     name="AICOE_ORCHESTRATOR_FN",
                     value="aicoe-fargate-orchestrator-endpoint-lambda",
                 ),
-                # APP_PASSWORD (FR-001) is set as a secret in the Amplify console,
-                # never in code.
+                # Monorepo: the Next.js app lives in web/. Amplify's framework
+                # detection needs this even though amplify.yml sets appRoot.
+                amplify.CfnApp.EnvironmentVariableProperty(
+                    name="AMPLIFY_MONOREPO_APP_ROOT", value="web"
+                ),
+                # APP_PASSWORD (FR-001) is set out-of-band as a branch env var in
+                # the Amplify console, never in code.
             ],
         )
 
