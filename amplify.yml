@@ -1,22 +1,24 @@
 version: 1
-# Monorepo: the Next.js app lives in web/. Amplify locates it via the
-# AMPLIFY_MONOREPO_APP_ROOT=web branch env var and runs these phases from there
-# (so baseDirectory .next resolves to web/.next). Keep this spec flat — pairing
-# the `applications:`/appRoot wrapper with the env var doubles the path.
-frontend:
-  phases:
-    preBuild:
-      commands:
-        - corepack enable
-        - pnpm install --frozen-lockfile
-    build:
-      commands:
-        - pnpm build
-  artifacts:
-    baseDirectory: .next
-    files:
-      - "**/*"
-  cache:
-    paths:
-      - .next/cache/**/*
-      - node_modules/**/*
+# Monorepo: the Next.js app lives in web/. Amplify requires BOTH the
+# applications/appRoot wrapper here AND the app-level env var
+# AMPLIFY_MONOREPO_APP_ROOT=web (set on the Amplify app) — together, not as
+# alternatives. appRoot and the env var must match.
+applications:
+  - appRoot: web
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - corepack enable
+            - pnpm install --frozen-lockfile
+        build:
+          commands:
+            - pnpm build
+      artifacts:
+        baseDirectory: .next
+        files:
+          - "**/*"
+      cache:
+        paths:
+          - .next/cache/**/*
+          - node_modules/**/*
