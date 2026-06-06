@@ -13,6 +13,10 @@ applications:
             - pnpm install --frozen-lockfile
         build:
           commands:
+            # Amplify console/branch env vars are available at BUILD time but not
+            # to the Next.js SSR runtime. Write the server-side ones into
+            # .env.production so Next bundles them into the compute output.
+            - env | grep -e '^APP_PASSWORD=' -e '^AICOE_ORCHESTRATOR_FN=' >> .env.production || true
             - pnpm build
       artifacts:
         baseDirectory: .next
