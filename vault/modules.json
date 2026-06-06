@@ -1,4 +1,545 @@
 {
   "version": 1,
-  "modules": []
+  "modules": [
+    {
+      "id": "module-1",
+      "name": "AI Maturity Screener",
+      "wave": 2,
+      "purpose": "Assess an organization's AI maturity stage (0-5) and recommend next steps.",
+      "when_to_use": [
+        "User wants to evaluate where a client sits on the AI maturity curve",
+        "User asks for a structured readiness or capability assessment",
+        "User needs stage-appropriate recommendations after a discovery call"
+      ],
+      "example_queries": [
+        "Run a maturity assessment for a regional bank",
+        "What stage is a client that has pilots but no production AI?",
+        "Assess our AI readiness and tell me what to do next"
+      ],
+      "agent_id": "AGENT-02",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": ["WORKER-01", "WORKER-02", "WORKER-03"],
+      "enabled": false
+    },
+    {
+      "id": "module-2",
+      "name": "Asset Library",
+      "wave": 1,
+      "purpose": "Browse and retrieve reference architectures, patterns, and templates from the vault.",
+      "when_to_use": [
+        "User wants to find an existing asset by industry, stage, or type",
+        "User asks what reference architectures or templates are available",
+        "User needs a starting artifact for an engagement"
+      ],
+      "example_queries": [
+        "Show me healthcare RAG reference architectures",
+        "Find a discovery workshop template",
+        "What fraud detection patterns do we have?"
+      ],
+      "agent_id": "AGENT-03",
+      "model_tier": "haiku-4-5",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-3",
+      "name": "Engagement Kit Builder",
+      "wave": 2,
+      "purpose": "Assemble a tailored engagement kit (assets, templates, checklists) for a client context.",
+      "when_to_use": [
+        "User wants a bundled set of assets for a specific engagement",
+        "User asks to package deliverables for a client kickoff",
+        "User needs a downloadable starter kit from current context"
+      ],
+      "example_queries": [
+        "Build a kit for a fintech fraud-scoring engagement",
+        "Assemble onboarding materials for a healthcare client",
+        "Create an engagement kit from this assessment"
+      ],
+      "agent_id": "AGENT-04",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-4",
+      "name": "Governance & Risk Checker",
+      "wave": 3,
+      "purpose": "Check a proposed AI use case against governance and risk controls; flag gaps.",
+      "when_to_use": [
+        "User wants a pre-delivery governance or risk pass",
+        "User asks whether a use case meets internal AI controls",
+        "User needs a risk checklist applied to a design"
+      ],
+      "example_queries": [
+        "Run a governance check on a credit-scoring model",
+        "What risks should we flag for a clinical decision-support tool?",
+        "Check this use case against our AI risk controls"
+      ],
+      "agent_id": "AGENT-05",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": ["WORKER-04", "WORKER-05"],
+      "enabled": false
+    },
+    {
+      "id": "module-5",
+      "name": "Knowledge Contribution",
+      "wave": 6,
+      "purpose": "Capture, structure, and curate new knowledge assets contributed by consultants.",
+      "when_to_use": [
+        "User wants to contribute a new asset or lesson to the vault",
+        "User asks to formalize a pattern they used on an engagement",
+        "User needs help structuring content to schema before submission"
+      ],
+      "example_queries": [
+        "Help me contribute a new solution pattern",
+        "Turn my engagement notes into a reusable template",
+        "Submit this architecture to the asset library"
+      ],
+      "agent_id": "AGENT-06",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-6",
+      "name": "Community & Enablement Hub",
+      "wave": 6,
+      "purpose": "Surface community discussions, enablement resources, and peer expertise.",
+      "when_to_use": [
+        "User wants to find who has worked on a topic or industry",
+        "User asks for enablement materials or community threads",
+        "User needs to connect with peers on a problem"
+      ],
+      "example_queries": [
+        "Who has experience with manufacturing predictive maintenance?",
+        "Find enablement resources on Bedrock",
+        "Show recent community discussions on agents"
+      ],
+      "agent_id": "AGENT-07",
+      "model_tier": "haiku-4-5",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-7",
+      "name": "Skills & Tools Repository",
+      "wave": 4,
+      "purpose": "Recommend tools and frameworks fit for a given context, stage, and constraints.",
+      "when_to_use": [
+        "User wants a tool recommendation for a specific scenario",
+        "User asks to compare frameworks for an implementation",
+        "User needs stage-appropriate tooling guidance"
+      ],
+      "example_queries": [
+        "What vector database should we use for a small RAG pilot?",
+        "Recommend an orchestration framework for a multi-agent system",
+        "Which tools fit a stage-2 organization?"
+      ],
+      "agent_id": "AGENT-08",
+      "model_tier": "haiku-4-5",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-8",
+      "name": "Q&A",
+      "wave": 4,
+      "purpose": "Answer knowledge questions from the vault with citations.",
+      "when_to_use": [
+        "User asks a factual question that the vault can answer",
+        "User wants a cited answer across multiple assets",
+        "User needs a quick lookup with sources"
+      ],
+      "example_queries": [
+        "What does the EU AI Act say about high-risk systems?",
+        "How do we handle PII in a RAG pipeline?",
+        "Summarize our guidance on model evaluation"
+      ],
+      "agent_id": "AGENT-09",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-9",
+      "name": "CoE Copilot (Chat Interface)",
+      "wave": 1,
+      "purpose": "Front-door conversational orchestrator that routes intent across all modules.",
+      "when_to_use": [
+        "User starts a conversation without a specific module in mind",
+        "User intent spans multiple modules and needs routing",
+        "User wants a narrated, cited response composed from several sources"
+      ],
+      "example_queries": [
+        "Help me prepare for a client kickoff next week",
+        "I need to assess a client and then build a kit",
+        "What should I know about AI compliance for fintech?"
+      ],
+      "agent_id": "AGENT-01",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-10",
+      "name": "Analytics Dashboard",
+      "wave": 6,
+      "purpose": "Surface usage, adoption, and engagement analytics across the platform.",
+      "when_to_use": [
+        "User wants metrics on platform or asset usage",
+        "User asks which assets or modules are most used",
+        "User needs an adoption snapshot"
+      ],
+      "example_queries": [
+        "Which assets were used most this quarter?",
+        "Show adoption metrics for the asset library",
+        "How many assessments were run last month?"
+      ],
+      "agent_id": "AGENT-10",
+      "model_tier": "haiku-4-5",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-11",
+      "name": "Prompt Engineering Studio",
+      "wave": 4,
+      "purpose": "Browse, fork, version, and refine reusable prompt templates.",
+      "when_to_use": [
+        "User wants a prompt template for a consulting task",
+        "User asks to fork and adapt an existing prompt",
+        "User needs to compare prompt versions"
+      ],
+      "example_queries": [
+        "Find a prompt for facilitating a use-case prioritization workshop",
+        "Fork the executive briefing prompt and tune it for healthcare",
+        "Show me prompt templates for risk assessment"
+      ],
+      "agent_id": "AGENT-11",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-12",
+      "name": "AI Use Case Ideation Engine",
+      "wave": 5,
+      "purpose": "Generate and rank candidate AI use cases for a client context.",
+      "when_to_use": [
+        "User wants ideas for where AI could help a client",
+        "User asks to prioritize a backlog of use cases",
+        "User needs value/effort-ranked candidates"
+      ],
+      "example_queries": [
+        "Suggest AI use cases for a mid-size retailer",
+        "Prioritize these use cases by value and feasibility",
+        "What high-impact AI opportunities exist in claims processing?"
+      ],
+      "agent_id": "AGENT-12",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-13",
+      "name": "Vendor & Model Evaluation Center",
+      "wave": 4,
+      "purpose": "Compare LLM providers, vector databases, and platforms against weighted criteria.",
+      "when_to_use": [
+        "User wants a side-by-side vendor or model comparison",
+        "User asks which model fits a workload and budget",
+        "User needs a structured evaluation matrix"
+      ],
+      "example_queries": [
+        "Compare Claude, GPT, and Gemini for document analysis",
+        "Pinecone vs pgvector vs S3 Vectors for a pilot",
+        "Which model is most cost-effective for summarization?"
+      ],
+      "agent_id": "AGENT-13",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-14",
+      "name": "Client-Facing Maturity Report Portal",
+      "wave": 6,
+      "purpose": "Generate a polished, client-ready maturity report (PDF) from an assessment.",
+      "when_to_use": [
+        "User wants a client-presentable report from an assessment",
+        "User asks to export findings as a branded PDF",
+        "User needs an executive-ready maturity summary"
+      ],
+      "example_queries": [
+        "Generate a client report from this assessment",
+        "Export the maturity findings as a PDF",
+        "Create an executive summary for the client"
+      ],
+      "agent_id": "AGENT-14",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": ["WORKER-06", "WORKER-07"],
+      "enabled": false
+    },
+    {
+      "id": "module-15",
+      "name": "AI News & Radar Feed",
+      "wave": 5,
+      "purpose": "Radar view of AI news and emerging tech (served by the intelligence-feed agent, AGENT-23).",
+      "when_to_use": [
+        "User wants a quick radar of what's new in AI",
+        "User asks for adopt/trial/assess/hold guidance on a technology",
+        "User needs a curated news digest"
+      ],
+      "example_queries": [
+        "What's new in AI this week?",
+        "Where does the radar place small language models?",
+        "Show me recent model releases worth watching"
+      ],
+      "agent_id": "AGENT-23",
+      "model_tier": "haiku-4-5",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-16",
+      "name": "Engagement Retrospective Tracker",
+      "wave": 5,
+      "purpose": "Capture engagement retrospectives and extract reusable insights.",
+      "when_to_use": [
+        "User wants to run or record an engagement retrospective",
+        "User asks to extract lessons learned from a project",
+        "User needs to find precedent from past retros"
+      ],
+      "example_queries": [
+        "Capture a retro for the fraud-scoring engagement",
+        "What lessons have we learned from healthcare RAG projects?",
+        "Extract insights from this project debrief"
+      ],
+      "agent_id": "AGENT-15",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-17",
+      "name": "Personal Dashboard",
+      "wave": 1,
+      "purpose": "Personalized landing view: recent activity, saved assets, and suggested next steps.",
+      "when_to_use": [
+        "User wants their personalized home view",
+        "User asks what they were working on or what's next",
+        "User needs quick access to saved or recent items"
+      ],
+      "example_queries": [
+        "Show my dashboard",
+        "What was I working on last?",
+        "What should I do next?"
+      ],
+      "agent_id": "AGENT-16",
+      "model_tier": "haiku-4-5",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-18",
+      "name": "AI Project Health Monitor",
+      "wave": 5,
+      "purpose": "Assess the health of an AI delivery project and flag risks early.",
+      "when_to_use": [
+        "User wants a health check on an in-flight project",
+        "User asks what risks threaten a delivery timeline",
+        "User needs a RAG-status view of project signals"
+      ],
+      "example_queries": [
+        "How healthy is the retail recommendation project?",
+        "What risks are emerging on this engagement?",
+        "Give me a project health summary"
+      ],
+      "agent_id": "AGENT-17",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-19",
+      "name": "Decision Log",
+      "wave": 5,
+      "purpose": "Record architecture and engagement decisions and surface relevant precedent.",
+      "when_to_use": [
+        "User wants to log a decision with its rationale",
+        "User asks what was decided previously on a topic",
+        "User needs precedent for a recurring choice"
+      ],
+      "example_queries": [
+        "Log our decision to use S3 Vectors over Pinecone",
+        "Have we decided on a default embedding model before?",
+        "Show decisions related to vector databases"
+      ],
+      "agent_id": "AGENT-18",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-20",
+      "name": "Certification & Badging",
+      "wave": 6,
+      "purpose": "Track consultant learning paths, certifications, and earned badges.",
+      "when_to_use": [
+        "User wants to see or pursue a certification path",
+        "User asks what badges they have or can earn",
+        "User needs a learning recommendation"
+      ],
+      "example_queries": [
+        "What certifications can I earn on AI governance?",
+        "Show my current badges",
+        "What's the next step in my learning path?"
+      ],
+      "agent_id": "AGENT-19",
+      "model_tier": "haiku-4-5",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-21",
+      "name": "AI Ethics & Bias Checker",
+      "wave": 3,
+      "purpose": "Review a use case for ethical risks and potential bias; recommend mitigations.",
+      "when_to_use": [
+        "User wants an ethics or fairness review of a use case",
+        "User asks about bias risks in a model or dataset",
+        "User needs mitigation recommendations"
+      ],
+      "example_queries": [
+        "Review a hiring-screening model for bias",
+        "What fairness risks exist in credit decisioning?",
+        "Run an ethics check on this use case"
+      ],
+      "agent_id": "AGENT-20",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": ["WORKER-08", "WORKER-09"],
+      "enabled": false
+    },
+    {
+      "id": "module-22",
+      "name": "Client Benchmark Comparator",
+      "wave": 5,
+      "purpose": "Compare a client's maturity and metrics against peer benchmarks.",
+      "when_to_use": [
+        "User wants to benchmark a client against peers",
+        "User asks how a client compares to industry norms",
+        "User needs a benchmark visualization or export"
+      ],
+      "example_queries": [
+        "How does this bank compare to peers on AI maturity?",
+        "Benchmark our client against industry stage averages",
+        "Show a peer comparison for retail"
+      ],
+      "agent_id": "AGENT-21",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-23",
+      "name": "Consultant Onboarding Journey",
+      "wave": 6,
+      "purpose": "Guide a new consultant through a personalized onboarding path.",
+      "when_to_use": [
+        "User is new and needs an onboarding path",
+        "User asks where to start learning the platform or domain",
+        "User needs role-tailored ramp-up guidance"
+      ],
+      "example_queries": [
+        "I'm new — where do I start?",
+        "Give me an onboarding plan for an AI delivery consultant",
+        "What should I learn first?"
+      ],
+      "agent_id": "AGENT-22",
+      "model_tier": "haiku-4-5",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-24",
+      "name": "AI Intelligence Feed & Release Radar",
+      "wave": 5,
+      "purpose": "Personalized feed of AI developments with CoE commentary and release radar.",
+      "when_to_use": [
+        "User wants a personalized AI intelligence feed",
+        "User asks what a development means for their work",
+        "User needs curated, commented updates"
+      ],
+      "example_queries": [
+        "Show my AI intelligence feed",
+        "What does the latest embedding model release mean for us?",
+        "Curate recent AI news relevant to healthcare"
+      ],
+      "agent_id": "AGENT-23",
+      "model_tier": "haiku-4-5",
+      "worker_ids": ["WORKER-10", "WORKER-11"],
+      "enabled": false
+    },
+    {
+      "id": "module-25",
+      "name": "Global AI Regulation & Compliance Tracker",
+      "wave": 3,
+      "purpose": "Look up AI regulations by geography and industry; track compliance obligations.",
+      "when_to_use": [
+        "User wants the regulations that apply to a use case",
+        "User asks about compliance obligations by region or industry",
+        "User needs a regulatory summary for a client"
+      ],
+      "example_queries": [
+        "What regulations apply to AI in EU healthcare?",
+        "Summarize HIPAA implications for an AI scribe",
+        "Which US rules cover AI in financial services?"
+      ],
+      "agent_id": "AGENT-24",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": ["WORKER-12", "WORKER-13"],
+      "enabled": false
+    },
+    {
+      "id": "module-26",
+      "name": "Universal Asset Q&A",
+      "wave": 2,
+      "purpose": "Chat with any single asset or document (\"chat with anything\").",
+      "when_to_use": [
+        "User wants to ask questions about one specific asset",
+        "User asks to summarize or interrogate a single document",
+        "User needs focused Q&A scoped to one file"
+      ],
+      "example_queries": [
+        "Summarize this reference architecture",
+        "What are the key risks called out in this checklist?",
+        "Ask questions about the fraud-scoring pattern"
+      ],
+      "agent_id": "AGENT-25",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "enabled": false
+    },
+    {
+      "id": "module-27",
+      "name": "Claude Code Development Accelerator",
+      "wave": 7,
+      "purpose": "Generate scaffolded starter code from a reference architecture (Opus, cost-capped).",
+      "when_to_use": [
+        "User wants to generate a starter codebase from an architecture",
+        "User asks to scaffold an implementation",
+        "User needs runnable boilerplate aligned to a pattern"
+      ],
+      "example_queries": [
+        "Generate a FastAPI + Lambda starter from the healthcare RAG architecture",
+        "Scaffold a Python project for the fraud-scoring pattern",
+        "Create starter code for a Bedrock RAG service"
+      ],
+      "agent_id": "AGENT-26",
+      "model_tier": "opus-4-7",
+      "worker_ids": ["WORKER-14", "WORKER-15", "WORKER-16"],
+      "enabled": false
+    }
+  ]
 }

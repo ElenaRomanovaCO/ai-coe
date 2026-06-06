@@ -26,6 +26,9 @@ jobs:
       - name: Ruff
         run: uv run ruff check agents infra
 
+      - name: Validate vault content
+        run: uv run python scripts/validate_vault.py
+
       - name: Pytest
         run: uv run pytest agents -q
 
