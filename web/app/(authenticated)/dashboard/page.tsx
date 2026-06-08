@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function DashboardPage() {
@@ -10,12 +12,21 @@ export default function DashboardPage() {
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
+        <Link href="/modules/asset-library" className="block">
+          <Card className="h-full transition-colors hover:border-neutral-400 hover:bg-neutral-50">
+            <CardHeader>
+              <CardTitle>Asset Library</CardTitle>
+              <CardDescription>Browse curated AI delivery assets.</CardDescription>
+            </CardHeader>
+            <CardContent className="text-sm text-neutral-500">Open →</CardContent>
+          </Card>
+        </Link>
         <Card>
           <CardHeader>
             <CardTitle>Chat</CardTitle>
             <CardDescription>Front-door orchestrator (built in wave 1).</CardDescription>
           </CardHeader>
-          <CardContent className="text-sm text-neutral-500">Coming soon.</CardContent>
+          <CardContent className="text-sm text-neutral-500">Use the dock, bottom-right.</CardContent>
         </Card>
         <Card>
           <CardHeader>

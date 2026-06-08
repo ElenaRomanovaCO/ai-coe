@@ -19,6 +19,7 @@ import re
 from typing import Any
 
 import yaml
+from botocore.exceptions import ClientError
 from pydantic import BaseModel, Field
 
 from agents.lib import models as lib_models
@@ -27,7 +28,15 @@ from .base import ModuleAgent
 
 AGENT_ID = "AGENT-03"
 ASSET_PREFIX = "assets/"
+META_PREFIX = "assets/_metadata/"
 _FRONTMATTER = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
+_SLUG_UNSAFE = re.compile(r"[^a-zA-Z0-9._-]+")
+_NOT_FOUND = {"NoSuchKey", "404", "NoSuchBucket"}
+
+
+def _slug(display_name: str) -> str:
+    s = _SLUG_UNSAFE.sub("-", (display_name or "").strip()).strip("-").lower()
+    return s or "anon"
 
 
 # --- wire models -----------------------------------------------------------
@@ -77,6 +86,7 @@ class AssetLibraryAgent(ModuleAgent):
         self,
         *,
         vault_bucket: str | None = None,
+        sessions_bucket: str | None = None,
         vector_bucket: str = "aicoe-content-vectors",
         index_name: str = "aicoe-content",
         embed_model: str = lib_models.TITAN_EMBED_V2,
@@ -88,6 +98,7 @@ class AssetLibraryAgent(ModuleAgent):
     ) -> None:
         super().__init__(**kwargs)
         self.vault_bucket = vault_bucket or os.environ.get("VAULT_BUCKET", "")
+        self.sessions_bucket = sessions_bucket or os.environ.get("SESSIONS_BUCKET", "")
         self.vector_bucket = vector_bucket
         self.index_name = index_name
         self.embed_model = embed_model
@@ -124,16 +135,78 @@ class AssetLibraryAgent(ModuleAgent):
     # --- dispatch ----------------------------------------------------------
     def handle(self, args: dict[str, Any]) -> dict[str, Any]:
         # The orchestrator builds ``args`` from the LLM, so be liberal in what we
-        # accept: ``id`` is a common alias for ``asset_id``. Op is inferred when
-        # absent (asset_id -> get, query -> search, else browse).
+        # accept: ``id`` is a common alias for ``asset_id``. Op is inferred for
+        # reads when absent (asset_id -> get, query -> search, else browse). Writes
+        # always require an explicit op (never inferred).
         if "asset_id" not in args and args.get("id"):
             args = {**args, "asset_id": args["id"]}
         op = args.get("op")
+
+        writes = {
+            "save_asset": self._save_asset,
+            "rate_asset": self._rate_asset,
+            "flag_asset": self._flag_asset,
+        }
+        if op in writes:
+            return self.run_tool(op, lambda _u, _fn=writes[op]: _fn(args))
+
         if op == "get_asset" or (op is None and args.get("asset_id")):
             return self.run_tool("get_asset", lambda _u: self._get_asset(args))
         if op == "search" or (op is None and args.get("query")):
             return self.run_tool("search_vector_index", lambda _u: self._search(args))
         return self.run_tool("list_assets", lambda _u: self._list_assets(args))
+
+    # --- JSON state helpers (user profiles + asset metadata sidecars) ------
+    def _user_key(self, display_name: str) -> str:
+        return f"users/{_slug(display_name)}.json"
+
+    def _meta_key(self, asset_id: str) -> str:
+        return f"{META_PREFIX}{asset_id}.json"
+
+    def _read_json(self, bucket: str, key: str, default: dict) -> dict:
+        try:
+            raw = self.s3.get_object(Bucket=bucket, Key=key)["Body"].read()
+        except ClientError as exc:
+            if exc.response.get("Error", {}).get("Code") in _NOT_FOUND:
+                return dict(default)
+            raise
+        except (KeyError, FileNotFoundError):  # fake clients / missing key
+            return dict(default)
+        try:
+            return json.loads(raw)
+        except (json.JSONDecodeError, ValueError):
+            return dict(default)
+
+    def _write_json(self, bucket: str, key: str, obj: dict) -> None:
+        self.s3.put_object(
+            Bucket=bucket,
+            Key=key,
+            Body=json.dumps(obj, separators=(",", ":")).encode("utf-8"),
+            ContentType="application/json",
+        )
+
+    def _default_meta(self, asset_id: str) -> dict:
+        return {
+            "asset_id": asset_id,
+            "rating_count": 0,
+            "rating_sum": 0,
+            "flag_count": 0,
+            "saved_count": 0,
+        }
+
+    def _default_profile(self, display_name: str) -> dict:
+        return {"display_name": display_name, "saved": [], "ratings": {}, "flags": []}
+
+    @staticmethod
+    def _aggregates(meta: dict) -> dict:
+        count = int(meta.get("rating_count", 0))
+        total = int(meta.get("rating_sum", 0))
+        return {
+            "average_rating": round(total / count, 2) if count else None,
+            "rating_count": count,
+            "flag_count": int(meta.get("flag_count", 0)),
+            "saved_count": int(meta.get("saved_count", 0)),
+        }
 
     # --- S3 helpers --------------------------------------------------------
     def _list_keys(self) -> list[str]:
@@ -204,8 +277,125 @@ class AssetLibraryAgent(ModuleAgent):
                     body_markdown=body.strip(),
                     frontmatter=fm,
                 )
-                return {"status": "ok", "asset": detail.model_dump()}
+                resolved_id = detail.summary.id
+                meta = self._read_json(
+                    self.vault_bucket, self._meta_key(resolved_id), self._default_meta(resolved_id)
+                )
+                out: dict[str, Any] = {
+                    "status": "ok",
+                    "asset": detail.model_dump(),
+                    "aggregates": self._aggregates(meta),
+                }
+                display_name = args.get("display_name")
+                if display_name:
+                    profile = self._read_json(
+                        self.sessions_bucket,
+                        self._user_key(display_name),
+                        self._default_profile(display_name),
+                    )
+                    out["user"] = {
+                        "saved": resolved_id in profile.get("saved", []),
+                        "rating": profile.get("ratings", {}).get(resolved_id),
+                        "flagged": resolved_id in profile.get("flags", []),
+                    }
+                return out
         return {"status": "not_found", "asset_id": asset_id, "message": "No such asset."}
+
+    # --- write operations (read-modify-write; demo-grade, no locking) ------
+    def _require(self, args: dict[str, Any], *keys: str) -> str | None:
+        for k in keys:
+            if not args.get(k):
+                return f"{k} is required."
+        return None
+
+    def _save_asset(self, args: dict[str, Any]) -> dict[str, Any]:
+        err = self._require(args, "asset_id", "display_name")
+        if err:
+            return {"status": "error", "message": err}
+        asset_id = args["asset_id"]
+        want_saved = bool(args.get("saved", True))
+
+        profile = self._read_json(
+            self.sessions_bucket,
+            self._user_key(args["display_name"]),
+            self._default_profile(args["display_name"]),
+        )
+        saved = set(profile.get("saved", []))
+        meta_key = self._meta_key(asset_id)
+        meta = self._read_json(self.vault_bucket, meta_key, self._default_meta(asset_id))
+
+        changed = False
+        if want_saved and asset_id not in saved:
+            saved.add(asset_id)
+            meta["saved_count"] = int(meta.get("saved_count", 0)) + 1
+            changed = True
+        elif not want_saved and asset_id in saved:
+            saved.discard(asset_id)
+            meta["saved_count"] = max(0, int(meta.get("saved_count", 0)) - 1)
+            changed = True
+
+        if changed:
+            profile["saved"] = sorted(saved)
+            self._write_json(self.sessions_bucket, self._user_key(args["display_name"]), profile)
+            self._write_json(self.vault_bucket, meta_key, meta)
+        return {"status": "ok", "asset_id": asset_id, "saved": want_saved, **self._aggregates(meta)}
+
+    def _rate_asset(self, args: dict[str, Any]) -> dict[str, Any]:
+        err = self._require(args, "asset_id", "display_name")
+        if err:
+            return {"status": "error", "message": err}
+        try:
+            rating = int(args["rating"])
+        except (KeyError, TypeError, ValueError):
+            return {"status": "error", "message": "rating (1-5) is required."}
+        if not 1 <= rating <= 5:
+            return {"status": "error", "message": "rating must be between 1 and 5."}
+        asset_id = args["asset_id"]
+
+        profile = self._read_json(
+            self.sessions_bucket,
+            self._user_key(args["display_name"]),
+            self._default_profile(args["display_name"]),
+        )
+        meta_key = self._meta_key(asset_id)
+        meta = self._read_json(self.vault_bucket, meta_key, self._default_meta(asset_id))
+
+        ratings = profile.get("ratings", {})
+        prev = ratings.get(asset_id)
+        if prev is None:
+            meta["rating_count"] = int(meta.get("rating_count", 0)) + 1
+            meta["rating_sum"] = int(meta.get("rating_sum", 0)) + rating
+        else:
+            meta["rating_sum"] = int(meta.get("rating_sum", 0)) + (rating - int(prev))
+        ratings[asset_id] = rating
+        profile["ratings"] = ratings
+
+        self._write_json(self.sessions_bucket, self._user_key(args["display_name"]), profile)
+        self._write_json(self.vault_bucket, meta_key, meta)
+        return {"status": "ok", "asset_id": asset_id, "rating": rating, **self._aggregates(meta)}
+
+    def _flag_asset(self, args: dict[str, Any]) -> dict[str, Any]:
+        err = self._require(args, "asset_id", "display_name")
+        if err:
+            return {"status": "error", "message": err}
+        asset_id = args["asset_id"]
+
+        profile = self._read_json(
+            self.sessions_bucket,
+            self._user_key(args["display_name"]),
+            self._default_profile(args["display_name"]),
+        )
+        meta_key = self._meta_key(asset_id)
+        meta = self._read_json(self.vault_bucket, meta_key, self._default_meta(asset_id))
+
+        flags = set(profile.get("flags", []))
+        if asset_id not in flags:  # one flag per user (idempotent)
+            flags.add(asset_id)
+            meta["flag_count"] = int(meta.get("flag_count", 0)) + 1
+            profile["flags"] = sorted(flags)
+            self._write_json(self.sessions_bucket, self._user_key(args["display_name"]), profile)
+            self._write_json(self.vault_bucket, meta_key, meta)
+        return {"status": "ok", "asset_id": asset_id, "flagged": True, **self._aggregates(meta)}
 
     def _embed(self, text: str) -> list[float]:
         resp = self.bedrock.invoke_model(

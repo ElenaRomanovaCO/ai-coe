@@ -64,8 +64,8 @@ def test_asset_library_url_present_when_enabled():
         if m["id"] == "module-2":
             m["enabled"] = True
     cache = make_cache(modules=modules)
-    url = asset_library_url("asset", "assets/x.md", cache.registry)
-    assert url == "/modules/module-2?file=assets/x.md"
+    url = asset_library_url("asset", "assets/healthcare/2/clinical-notes-rag.md", cache.registry)
+    assert url == "/modules/asset-library/clinical-notes-rag"
 
 
 def test_asset_library_url_none_for_non_asset():

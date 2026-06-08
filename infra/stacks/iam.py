@@ -260,6 +260,16 @@ class IamStack(Stack):
                 conditions={"StringEquals": {"lambda:FunctionUrlAuthType": "AWS_IAM"}},
             )
         )
+        # Read-only module flows (e.g. Asset Library browse/detail, save/rate/flag)
+        # invoke the module-agents Lambda directly — no orchestrator in the loop.
+        # Buffered lambda:Invoke (not the streaming Function URL), so the web still
+        # never touches S3/Bedrock directly.
+        self.amplify_ssr_role.add_to_policy(
+            iam.PolicyStatement(
+                actions=["lambda:InvokeFunction"],
+                resources=[fn_arn(MODULE_AGENTS_FN)],
+            )
+        )
         # Amplify manages the SSR compute log groups under /aws/amplify/.
         self.amplify_ssr_role.add_to_policy(
             iam.PolicyStatement(

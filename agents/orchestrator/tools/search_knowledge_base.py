@@ -33,7 +33,10 @@ def asset_library_url(
     module = registry.by_id(ASSET_LIBRARY_MODULE_ID)
     if module is None or not module.enabled:
         return None
-    return f"/modules/{ASSET_LIBRARY_MODULE_ID}?file={file_path}"
+    # The Asset Library detail route is /modules/asset-library/{id}; for assets the
+    # frontmatter id equals the file slug (basename without .md).
+    asset_id = file_path.rsplit("/", 1)[-1].removesuffix(".md")
+    return f"/modules/asset-library/{asset_id}"
 
 
 class KnowledgeBaseSearcher:

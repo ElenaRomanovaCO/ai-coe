@@ -45,8 +45,10 @@ ASSET_KEYS = {
 
 
 class FakeS3:
+    """In-memory S3 keyed by Key (Bucket ignored — tests use distinct prefixes)."""
+
     def __init__(self, objects: dict[str, str]):
-        self.objects = objects  # key -> text
+        self.objects = dict(objects)  # key -> text
 
     def list_objects_v2(self, Bucket, Prefix="", ContinuationToken=None):
         contents = [{"Key": k} for k in self.objects if k.startswith(Prefix)]
@@ -56,6 +58,9 @@ class FakeS3:
         if Key not in self.objects:
             raise KeyError(Key)
         return {"Body": io.BytesIO(self.objects[Key].encode("utf-8"))}
+
+    def put_object(self, Bucket, Key, Body, **kwargs):
+        self.objects[Key] = Body.decode("utf-8") if isinstance(Body, bytes) else Body
 
 
 class FakeBedrockEmbed:
@@ -84,6 +89,7 @@ def make_agent(*, vectors=None):
 
     return AssetLibraryAgent(
         vault_bucket="vault-bucket",
+        sessions_bucket="sessions-bucket",
         s3=FakeS3(dict(ASSET_KEYS)),
         bedrock=FakeBedrockEmbed(),
         s3vectors=FakeS3Vectors(vectors or []),

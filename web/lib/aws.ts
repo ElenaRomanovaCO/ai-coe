@@ -63,3 +63,19 @@ export async function invokeLambda<T = unknown>(
 export function orchestratorFunctionName(): string {
   return process.env.AICOE_ORCHESTRATOR_FN ?? "aicoe-fargate-orchestrator-endpoint-lambda";
 }
+
+export function moduleAgentsFunctionName(): string {
+  return process.env.AICOE_MODULE_AGENTS_FN ?? "aicoe-module-agents-lambda";
+}
+
+/**
+ * Buffered invoke of a Layer-2 module agent via the module-agents Lambda.
+ * Sends the router's {agent_id, args} contract and returns the parsed result.
+ * Read-only/CRUD module flows go straight here — no orchestrator in the loop.
+ */
+export async function invokeModule<T = unknown>(
+  agentId: string,
+  args: Record<string, unknown>,
+): Promise<T> {
+  return invokeLambda<T>(moduleAgentsFunctionName(), { agent_id: agentId, args });
+}
