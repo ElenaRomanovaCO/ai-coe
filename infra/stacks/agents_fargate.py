@@ -61,7 +61,7 @@ class AgentsFargateStack(Stack):
         image = ecs.ContainerImage.from_asset(
             directory=str(_REPO_ROOT),
             file=_DOCKERFILE,
-            platform=ecr_assets.Platform.LINUX_ARM64,
+            platform=ecr_assets.Platform.LINUX_AMD64,  # matches agents.py (x86_64)
         )
 
         service = ecs_patterns.ApplicationLoadBalancedFargateService(
@@ -73,7 +73,7 @@ class AgentsFargateStack(Stack):
             desired_count=1,
             public_load_balancer=False,  # internal ALB
             runtime_platform=ecs.RuntimePlatform(
-                cpu_architecture=ecs.CpuArchitecture.ARM64,
+                cpu_architecture=ecs.CpuArchitecture.X86_64,
                 operating_system_family=ecs.OperatingSystemFamily.LINUX,
             ),
             capacity_provider_strategies=[

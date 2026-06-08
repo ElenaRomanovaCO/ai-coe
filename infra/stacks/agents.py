@@ -62,9 +62,13 @@ class AgentsStack(Stack):
             code=lambda_.DockerImageCode.from_image_asset(
                 directory=str(_REPO_ROOT),
                 file=_DOCKERFILE,
-                platform=ecr_assets.Platform.LINUX_ARM64,
+                # x86_64 (not ARM64): the image builds natively on the Windows dev
+                # host; ARM64 would need slow/flaky QEMU emulation. The Lambda cost
+                # edge of ARM is negligible at POC scale. The Dockerfile is
+                # arch-agnostic (python:3.12-slim + LWA are multi-arch).
+                platform=ecr_assets.Platform.LINUX_AMD64,
             ),
-            architecture=lambda_.Architecture.ARM_64,
+            architecture=lambda_.Architecture.X86_64,
             role=orchestrator_role,
             memory_size=1024,
             # First-token p95 < 3s, but allow a long ceiling for multi-tool turns
