@@ -10,6 +10,7 @@ import os
 
 import aws_cdk as cdk
 
+from stacks.agents import AgentsStack
 from stacks.config import REGION
 from stacks.events import EventsStack
 from stacks.frontend import FrontendStack
@@ -31,7 +32,7 @@ iam_stack = IamStack(
     env=env,
 )
 
-GuardrailsStack(app, "AiCoE-Guardrails", env=env)
+guardrails = GuardrailsStack(app, "AiCoE-Guardrails", env=env)
 
 EventsStack(
     app,
@@ -48,10 +49,23 @@ ObservabilityStack(
     env=env,
 )
 
+# AGENT-01 orchestrator (streaming Lambda + Function URL). See agents_fargate.py
+# for the documented, un-deployed Fargate scale-up path.
+agents = AgentsStack(
+    app,
+    "AiCoE-Agents",
+    vault_bucket=storage.vault_bucket,
+    sessions_bucket=storage.sessions_bucket,
+    orchestrator_role=iam_stack.orchestrator_lambda_role,
+    guardrail=guardrails.guardrail,
+    env=env,
+)
+
 FrontendStack(
     app,
     "AiCoE-Frontend",
     ssr_role=iam_stack.amplify_ssr_role,
+    orchestrator_url=agents.function_url_value,
     env=env,
 )
 

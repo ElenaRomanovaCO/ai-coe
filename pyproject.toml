@@ -11,10 +11,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Strands runtime is only needed when actually running agents (Fargate/Lambda),
+# Runtime deps are only needed when actually running agents (Fargate/Lambda),
 # not for unit-testing the shared lib. Kept optional so the test suite installs lean.
+# Per vault/decisions/agent-runtime.md we build on Bedrock Converse, not Strands —
+# the orchestrator's only runtime deps are the ASGI server stack.
 runtime = [
-    "strands-agents>=0.1",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
 ]
 
 [dependency-groups]

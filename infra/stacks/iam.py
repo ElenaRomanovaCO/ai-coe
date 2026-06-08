@@ -85,6 +85,49 @@ class IamStack(Stack):
         )
         self.fargate_role.add_to_policy(cw_put_metrics)
 
+        # --- Orchestrator Lambda (POC runtime, AGENT-01) ------------------
+        # Same permission set as the Fargate role, but with a lambda trust policy.
+        # Per vault/decisions/poc-runtime.md the orchestrator runs as a streaming
+        # Lambda (Function URL + Lambda Web Adapter) for ~$0 idle; the Fargate role
+        # above stays for the documented scale-up path. Search-only on S3 Vectors
+        # (no PutVectors — that's the ReEmbed Lambda's job).
+        self.orchestrator_lambda_role = iam.Role(
+            self,
+            "OrchestratorLambdaRole",
+            role_name="aicoe-orchestrator-lambda-role",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+        )
+        self.orchestrator_lambda_role.add_to_policy(
+            iam.PolicyStatement(
+                actions=["lambda:InvokeFunction"], resources=[fn_arn(MODULE_AGENTS_FN)]
+            )
+        )
+        self.orchestrator_lambda_role.add_to_policy(
+            iam.PolicyStatement(
+                actions=[
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream",
+                    "bedrock:ApplyGuardrail",
+                ],
+                resources=chat_model_arns + ["*"],  # ApplyGuardrail is on a guardrail ARN
+            )
+        )
+        self.orchestrator_lambda_role.add_to_policy(
+            iam.PolicyStatement(
+                actions=["s3:GetObject", "s3:PutObject"], resources=[vault_objs, sessions_objs]
+            )
+        )
+        self.orchestrator_lambda_role.add_to_policy(
+            iam.PolicyStatement(actions=["s3vectors:QueryVectors"], resources=[vector_index])
+        )
+        self.orchestrator_lambda_role.add_to_policy(cw_put_metrics)
+        self.orchestrator_lambda_role.add_to_policy(
+            iam.PolicyStatement(
+                actions=["logs:CreateLogStream", "logs:PutLogEvents"],
+                resources=[log_group_arn(ORCHESTRATOR_ENDPOINT_FN)],
+            )
+        )
+
         # --- Module agents Lambda -----------------------------------------
         self.module_agents_role = iam.Role(
             self,
@@ -174,12 +217,16 @@ class IamStack(Stack):
             role_name="aicoe-amplify-ssr-role",
             assumed_by=iam.ServicePrincipal("amplify.amazonaws.com"),
         )
-        # Frontend may only invoke the orchestrator endpoint Lambda — no S3,
-        # no Bedrock, no S3 Vectors.
+        # Frontend may only invoke the orchestrator's Function URL — no S3, no
+        # Bedrock, no S3 Vectors. The orchestrator streams via a Function URL
+        # (InvokeMode=RESPONSE_STREAM, IAM auth), so the action is
+        # lambda:InvokeFunctionUrl, constrained to IAM-authed URLs. The function's
+        # matching resource-based permission is added in the agents stack.
         self.amplify_ssr_role.add_to_policy(
             iam.PolicyStatement(
-                actions=["lambda:InvokeFunction", "lambda:InvokeWithResponseStream"],
+                actions=["lambda:InvokeFunctionUrl"],
                 resources=[fn_arn(ORCHESTRATOR_ENDPOINT_FN)],
+                conditions={"StringEquals": {"lambda:FunctionUrlAuthType": "AWS_IAM"}},
             )
         )
         # Amplify manages the SSR compute log groups under /aws/amplify/.

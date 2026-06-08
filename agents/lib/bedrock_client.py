@@ -7,6 +7,7 @@ cap, records actual usage afterward, and retries throttling with backoff.
 
 from __future__ import annotations
 
+import json
 import time
 from typing import Any
 
@@ -50,22 +51,20 @@ class BedrockClient:
             self._client = boto3.client("bedrock-runtime", region_name=self.region)
         return self._client
 
-    def converse(
+    def _prepare(
         self,
         *,
         model_id: str,
         messages: list[dict],
-        system: str | None = None,
-        max_tokens: int = 1024,
-        temperature: float = 0.2,
-        usage: Usage | None = None,
-        use_inference_profile: bool = True,
-    ) -> dict:
-        """Call Bedrock Converse, enforce the Opus cap, and return the raw response.
-
-        If ``usage`` is supplied (e.g. from an ``instrumented`` block) its token
-        and cost fields are populated from the response.
-        """
+        system: str | None,
+        max_tokens: int,
+        temperature: float,
+        use_inference_profile: bool,
+        tool_config: dict | None,
+        guardrail_id: str | None,
+        guardrail_version: str,
+    ) -> dict[str, Any]:
+        """Build Converse kwargs and run the Opus pre-check. Shared by both modes."""
         if models.is_opus(model_id) and self.cost_cap is not None:
             est_in = _estimate_input_tokens(messages, system)
             estimate = models.cost_usd(model_id, est_in, max_tokens)
@@ -79,24 +78,138 @@ class BedrockClient:
         }
         if system:
             kwargs["system"] = [{"text": system}]
+        if tool_config:
+            kwargs["toolConfig"] = tool_config
+        if guardrail_id:
+            kwargs["guardrailConfig"] = {
+                "guardrailIdentifier": guardrail_id,
+                "guardrailVersion": guardrail_version,
+            }
+        return kwargs
 
-        response = self._call_with_retry(kwargs)
-
-        u = response.get("usage", {})
+    def _record_usage(self, model_id: str, u: dict, usage: Usage | None) -> None:
         tokens_in = int(u.get("inputTokens", 0))
         tokens_out = int(u.get("outputTokens", 0))
         call_cost = models.cost_usd(model_id, tokens_in, tokens_out)
-
         if usage is not None:
             usage.tokens_in += tokens_in
             usage.tokens_out += tokens_out
             usage.cost_usd += call_cost
             usage.model_id = model_id
-
         if models.is_opus(model_id) and self.cost_cap is not None:
             self.cost_cap.add_usage(tokens_in + tokens_out, call_cost)
 
+    def converse(
+        self,
+        *,
+        model_id: str,
+        messages: list[dict],
+        system: str | None = None,
+        max_tokens: int = 1024,
+        temperature: float = 0.2,
+        usage: Usage | None = None,
+        use_inference_profile: bool = True,
+        tool_config: dict | None = None,
+        guardrail_id: str | None = None,
+        guardrail_version: str = "DRAFT",
+    ) -> dict:
+        """Call Bedrock Converse, enforce the Opus cap, and return the raw response.
+
+        If ``usage`` is supplied (e.g. from an ``instrumented`` block) its token
+        and cost fields are populated from the response. Pass ``tool_config`` for
+        tool use and ``guardrail_id`` to apply a Bedrock guardrail.
+        """
+        kwargs = self._prepare(
+            model_id=model_id,
+            messages=messages,
+            system=system,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            use_inference_profile=use_inference_profile,
+            tool_config=tool_config,
+            guardrail_id=guardrail_id,
+            guardrail_version=guardrail_version,
+        )
+        response = self._call_with_retry(kwargs)
+        self._record_usage(model_id, response.get("usage", {}), usage)
         return response
+
+    def converse_stream(
+        self,
+        *,
+        model_id: str,
+        messages: list[dict],
+        system: str | None = None,
+        max_tokens: int = 1024,
+        temperature: float = 0.2,
+        usage: Usage | None = None,
+        use_inference_profile: bool = True,
+        tool_config: dict | None = None,
+        guardrail_id: str | None = None,
+        guardrail_version: str = "DRAFT",
+    ) -> Any:
+        """Stream a Converse turn, yielding normalized events.
+
+        Yields dicts of one of these shapes (the agent loop consumes them):
+          - ``{"type": "text", "text": <delta>}``
+          - ``{"type": "tool_use", "tool_use": {"toolUseId", "name", "input"}}``
+          - ``{"type": "stop", "stop_reason": <reason>}``
+        ``usage`` (if given) is filled from the trailing metadata event. Streaming
+        is not retried mid-stream; transient errors before the first event surface
+        to the caller.
+        """
+        kwargs = self._prepare(
+            model_id=model_id,
+            messages=messages,
+            system=system,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            use_inference_profile=use_inference_profile,
+            tool_config=tool_config,
+            guardrail_id=guardrail_id,
+            guardrail_version=guardrail_version,
+        )
+        response = self.client.converse_stream(**kwargs)
+        return self._iter_stream(model_id, response["stream"], usage)
+
+    def _iter_stream(self, model_id: str, stream: Any, usage: Usage | None):
+        # Accumulates streamed toolUse input (partial JSON across deltas) per
+        # content-block index, emitting a single tool_use event at block stop.
+        tool_blocks: dict[int, dict[str, Any]] = {}
+        for event in stream:
+            if "contentBlockStart" in event:
+                ev = event["contentBlockStart"]
+                idx = ev.get("contentBlockIndex", 0)
+                start = ev.get("start", {})
+                if "toolUse" in start:
+                    tu = start["toolUse"]
+                    tool_blocks[idx] = {
+                        "toolUseId": tu.get("toolUseId"),
+                        "name": tu.get("name"),
+                        "input_json": "",
+                    }
+            elif "contentBlockDelta" in event:
+                ev = event["contentBlockDelta"]
+                idx = ev.get("contentBlockIndex", 0)
+                delta = ev.get("delta", {})
+                if "text" in delta:
+                    yield {"type": "text", "text": delta["text"]}
+                elif "toolUse" in delta and idx in tool_blocks:
+                    tool_blocks[idx]["input_json"] += delta["toolUse"].get("input", "")
+            elif "contentBlockStop" in event:
+                idx = event["contentBlockStop"].get("contentBlockIndex", 0)
+                if idx in tool_blocks:
+                    block = tool_blocks.pop(idx)
+                    raw = block.pop("input_json") or "{}"
+                    try:
+                        block["input"] = json.loads(raw)
+                    except json.JSONDecodeError:
+                        block["input"] = {}
+                    yield {"type": "tool_use", "tool_use": block}
+            elif "messageStop" in event:
+                yield {"type": "stop", "stop_reason": event["messageStop"].get("stopReason")}
+            elif "metadata" in event:
+                self._record_usage(model_id, event["metadata"].get("usage", {}), usage)
 
     def _call_with_retry(self, kwargs: dict) -> dict:
         from botocore.exceptions import ClientError

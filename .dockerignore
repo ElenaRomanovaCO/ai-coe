@@ -1,0 +1,14 @@
+# Build context for agents/orchestrator/Dockerfile is the repo root, but the image
+# only needs the agents package + pyproject + README. Whitelist those and exclude
+# everything else — critically web/node_modules (symlinks break asset staging on
+# Windows) and the virtualenvs / VCS / caches.
+*
+!agents
+!pyproject.toml
+!README.md
+
+# Re-exclude noise inside the whitelisted agents tree.
+agents/**/__pycache__
+agents/**/*.pyc
+agents/**/.pytest_cache
+agents/**/tests

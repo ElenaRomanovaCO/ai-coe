@@ -1,15 +1,50 @@
 import "server-only";
 
+import { AwsClient } from "aws4fetch";
 import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 
-// IAM-signed Lambda invocation from Next.js server actions/routes. On AWS Amplify
-// Hosting (Gen 2), the SSR compute Lambda already runs with the attached
-// aicoe-amplify-ssr-role, so the SDK's default credential provider resolves the
-// role automatically — no static keys and no AssumeRole step. That role may only
-// invoke the orchestrator endpoint Lambda.
+// IAM-signed AWS calls from Next.js server actions/routes. On AWS Amplify Hosting
+// (Gen 2), the SSR compute role (aicoe-amplify-ssr-role) is attached at runtime, so
+// credentials resolve from the standard env vars with no static keys and no
+// AssumeRole step. That role may only invoke the orchestrator Function URL.
 
 const REGION = process.env.AWS_REGION ?? "us-east-1";
 
+/** SigV4 client bound to the SSR role's runtime credentials, signing for Lambda. */
+function awsClient(): AwsClient {
+  return new AwsClient({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? "",
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? "",
+    sessionToken: process.env.AWS_SESSION_TOKEN,
+    region: REGION,
+    service: "lambda", // Function URL invocations are signed against the lambda service
+  });
+}
+
+/** Base Function URL of the streaming orchestrator (AGENT-01). */
+export function orchestratorUrl(): string {
+  const url = process.env.AICOE_ORCHESTRATOR_URL;
+  if (!url) {
+    throw new Error("AICOE_ORCHESTRATOR_URL is not set (orchestrator Function URL).");
+  }
+  return url.replace(/\/+$/, "");
+}
+
+/**
+ * POST a ChatRequest to the orchestrator's streaming Function URL and return the
+ * raw streaming Response. The body is a ReadableStream of SSE bytes
+ * (event: token|tool|citation|done|error) that the caller pipes to the browser.
+ */
+export async function streamChat(payload: unknown): Promise<Response> {
+  const client = awsClient();
+  return client.fetch(`${orchestratorUrl()}/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+// --- Legacy buffered invoke (kept for any non-streaming caller) -------------
 export async function invokeLambda<T = unknown>(
   functionName: string,
   payload: unknown,

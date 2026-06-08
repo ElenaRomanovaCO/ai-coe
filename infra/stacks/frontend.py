@@ -28,6 +28,7 @@ class FrontendStack(Stack):
         construct_id: str,
         *,
         ssr_role: iam.IRole,
+        orchestrator_url: str | None = None,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -41,6 +42,31 @@ class FrontendStack(Stack):
         token_secret = self.node.try_get_context("github_token_secret") or "aicoe/github-token"
         access_token = f"{{{{resolve:secretsmanager:{token_secret}:SecretString:token}}}}"
 
+        env_vars = [
+            # NB: Amplify forbids env vars with the reserved "AWS" prefix; the
+            # SSR runtime injects AWS_REGION automatically, and lib/aws.ts
+            # defaults to us-east-1, so it is not set here.
+            amplify.CfnApp.EnvironmentVariableProperty(
+                name="AICOE_ORCHESTRATOR_FN",
+                value="aicoe-fargate-orchestrator-endpoint-lambda",
+            ),
+            # Monorepo: the Next.js app lives in web/. Amplify's framework
+            # detection needs this even though amplify.yml sets appRoot.
+            amplify.CfnApp.EnvironmentVariableProperty(
+                name="AMPLIFY_MONOREPO_APP_ROOT", value="web"
+            ),
+            # APP_PASSWORD (FR-001) is set out-of-band as a branch env var in
+            # the Amplify console, never in code.
+        ]
+        if orchestrator_url is not None:
+            # The streaming orchestrator's Function URL (SigV4 streaming fetch in
+            # web/lib/aws.ts). Supplied by the agents stack.
+            env_vars.append(
+                amplify.CfnApp.EnvironmentVariableProperty(
+                    name="AICOE_ORCHESTRATOR_URL", value=orchestrator_url
+                )
+            )
+
         app = amplify.CfnApp(
             self,
             "WebApp",
@@ -50,22 +76,7 @@ class FrontendStack(Stack):
             # WEB_COMPUTE = SSR (App Router + Server Actions) on Amplify Hosting.
             platform="WEB_COMPUTE",
             compute_role_arn=ssr_role.role_arn,
-            environment_variables=[
-                # NB: Amplify forbids env vars with the reserved "AWS" prefix; the
-                # SSR runtime injects AWS_REGION automatically, and lib/aws.ts
-                # defaults to us-east-1, so it is not set here.
-                amplify.CfnApp.EnvironmentVariableProperty(
-                    name="AICOE_ORCHESTRATOR_FN",
-                    value="aicoe-fargate-orchestrator-endpoint-lambda",
-                ),
-                # Monorepo: the Next.js app lives in web/. Amplify's framework
-                # detection needs this even though amplify.yml sets appRoot.
-                amplify.CfnApp.EnvironmentVariableProperty(
-                    name="AMPLIFY_MONOREPO_APP_ROOT", value="web"
-                ),
-                # APP_PASSWORD (FR-001) is set out-of-band as a branch env var in
-                # the Amplify console, never in code.
-            ],
+            environment_variables=env_vars,
         )
 
         amplify.CfnBranch(

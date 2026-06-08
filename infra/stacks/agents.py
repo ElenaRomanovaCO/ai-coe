@@ -1,0 +1,98 @@
+"""Agents stack: AGENT-01 (Chat orchestrator) as a streaming Lambda.
+
+Per ``vault/decisions/poc-runtime.md`` the POC orchestrator runs as a container
+Lambda fronted by the Lambda Web Adapter, exposed through a Function URL with
+``InvokeMode=RESPONSE_STREAM`` and IAM auth — ~$0 when idle, streaming when used.
+The Next.js SSR role invokes the Function URL with SigV4; there is no ALB and no
+separate proxy Lambda.
+
+The function keeps the name ``aicoe-fargate-orchestrator-endpoint-lambda`` (wired
+into the SSR role and web/lib/aws.ts by the foundation) even though it is now a
+Lambda rather than a Fargate endpoint. The Fargate variant lives in
+``agents_fargate.py`` as a documented, un-deployed scale-up path.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from aws_cdk import CfnOutput, Duration, RemovalPolicy, Stack
+from aws_cdk import aws_bedrock as bedrock
+from aws_cdk import aws_ecr_assets as ecr_assets
+from aws_cdk import aws_iam as iam
+from aws_cdk import aws_lambda as lambda_
+from aws_cdk import aws_logs as logs
+from aws_cdk import aws_s3 as s3
+from constructs import Construct
+
+from . import config
+from .iam import MODULE_AGENTS_FN, ORCHESTRATOR_ENDPOINT_FN
+
+# infra/stacks/agents.py -> repo root (build context for the Docker image).
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_DOCKERFILE = "agents/orchestrator/Dockerfile"
+
+
+class AgentsStack(Stack):
+    def __init__(
+        self,
+        scope: Construct,
+        construct_id: str,
+        *,
+        vault_bucket: s3.IBucket,
+        sessions_bucket: s3.IBucket,
+        orchestrator_role: iam.IRole,
+        guardrail: bedrock.CfnGuardrail,
+        **kwargs,
+    ) -> None:
+        super().__init__(scope, construct_id, **kwargs)
+
+        log_group = logs.LogGroup(
+            self,
+            "OrchestratorLogGroup",
+            log_group_name=f"/aws/lambda/{ORCHESTRATOR_ENDPOINT_FN}",
+            retention=logs.RetentionDays.ONE_MONTH,
+            removal_policy=RemovalPolicy.DESTROY,
+        )
+
+        self.function = lambda_.DockerImageFunction(
+            self,
+            "OrchestratorFunction",
+            function_name=ORCHESTRATOR_ENDPOINT_FN,
+            code=lambda_.DockerImageCode.from_image_asset(
+                directory=str(_REPO_ROOT),
+                file=_DOCKERFILE,
+                platform=ecr_assets.Platform.LINUX_ARM64,
+            ),
+            architecture=lambda_.Architecture.ARM_64,
+            role=orchestrator_role,
+            memory_size=1024,
+            # First-token p95 < 3s, but allow a long ceiling for multi-tool turns
+            # and streamed completions (well under the Function URL 15-min cap).
+            timeout=Duration.minutes(5),
+            environment={
+                "VAULT_BUCKET": vault_bucket.bucket_name,
+                "SESSIONS_BUCKET": sessions_bucket.bucket_name,
+                "VECTOR_BUCKET": config.VECTOR_BUCKET_NAME,
+                "VECTOR_INDEX": config.VECTOR_INDEX_NAME,
+                "GUARDRAIL_ID": guardrail.attr_guardrail_id,
+                "MODULE_AGENTS_FN": MODULE_AGENTS_FN,
+                # AWS_LWA_INVOKE_MODE is baked into the image (the AWS_* prefix is
+                # reserved for Lambda env vars), so it is not set here.
+            },
+            log_group=log_group,
+        )
+
+        # Streaming Function URL with IAM auth. RESPONSE_STREAM is what makes the
+        # Lambda Web Adapter stream SSE through to the caller. The SSR role and this
+        # function are in the same account, so the identity-based
+        # lambda:InvokeFunctionUrl grant on the SSR role (IAM stack) is sufficient
+        # to authorize invocation — no resource-based policy is required.
+        self.function_url = self.function.add_function_url(
+            auth_type=lambda_.FunctionUrlAuthType.AWS_IAM,
+            invoke_mode=lambda_.InvokeMode.RESPONSE_STREAM,
+        )
+
+        self.function_url_value = self.function_url.url
+        CfnOutput(self, "OrchestratorFunctionUrl", value=self.function_url.url)
+        CfnOutput(self, "OrchestratorFunctionName", value=self.function.function_name)
