@@ -53,7 +53,7 @@ Demo outcome: login → browse Asset Library → chat about vault contents → s
 | # | Task File | Module | Covers FRs | Agents | Depends On | Status |
 |---|---|---|---|---|---|---|
 | 01 | [01_wave1_vault_seed_content.md](./01_wave1_vault_seed_content.md) | (substrate) | enables retrieval | none | 00 | ☑ |
-| 02 | [02_wave1_chat_orchestrator.md](./02_wave1_chat_orchestrator.md) | Module 9 (Chat) | 002, 003, 006, 007, 008, 009 | AGENT-01 | 00, 01 | ☐ |
+| 02 | [02_wave1_chat_orchestrator.md](./02_wave1_chat_orchestrator.md) | Module 9 (Chat) | 002, 003, 006, 007, 008, 009 | AGENT-01 | 00, 01 | ☑ |
 | 03 | [03_wave1_asset_library.md](./03_wave1_asset_library.md) | Module 2 | 010, 011, 012, 013 | AGENT-03 | 00, 01, 02 | ☐ |
 | 04 | [04_wave1_personal_dashboard.md](./04_wave1_personal_dashboard.md) | Module 17 | 014, 015 | AGENT-16 | 00, 01, 02, 03 | ☐ |
 
