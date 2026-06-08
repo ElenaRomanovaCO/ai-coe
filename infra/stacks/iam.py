@@ -127,7 +127,12 @@ class IamStack(Stack):
             )
         )
         self.orchestrator_lambda_role.add_to_policy(
-            iam.PolicyStatement(actions=["s3vectors:QueryVectors"], resources=[vector_index])
+            iam.PolicyStatement(
+                # QueryVectors does the similarity search; GetVectors fetches the
+                # matched chunks' content/metadata for citations.
+                actions=["s3vectors:QueryVectors", "s3vectors:GetVectors"],
+                resources=[vector_index],
+            )
         )
         self.orchestrator_lambda_role.add_to_policy(cw_put_metrics)
         self.orchestrator_lambda_role.add_to_policy(
