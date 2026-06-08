@@ -181,6 +181,11 @@ Same as task 00.
 
 ## C. Notes & Decisions Log
 - 2026-06-03: created. Read-only module; aggregates in sidecar JSON files to keep source .md clean.
+- 2026-06-07: **Module-agents routing = static dispatch registry, NOT Strands** (cross-cutting; all 26 module agents inherit it). `router.py` maps `agent_id → ModuleAgent factory`; each agent dispatches an `op` key. Resolves the spec's "internal Strands routing" against `vault/decisions/agent-runtime.md`. Full rationale: `vault/decisions/module-agent-routing.md`.
+- 2026-06-07: **Backend-core slice DONE** (agent + router + module Lambda + IAM + modules.json flip + tests; synth-clean, NOT deployed). UI slice (browse/detail pages, MarkdownRenderer, FrontmatterPanel, save/rate/flag server actions) deferred to next session, same scoping as task 02.
+- 2026-06-07: **`module-agents-lambda-role` IAM deltas baked in** (spec said "no new permissions" — wrong; these would 403 live like AGENT-01 did): added `s3:ListBucket` on vault+sessions (404 not 403), `s3vectors:GetVectors` (citation content) alongside QueryVectors, and **Titan** in `bedrock:InvokeModel` (search embeds with Titan — chat-model-only scoping would 403 the vector search).
+- 2026-06-07: AGENT-03 built **mechanical** (deterministic S3 reads for list/get; embedding-only Titan→S3 Vectors for search) — no chat-LLM loop for a read-only Haiku module. Module-2 `enabled` flipped to true; **must re-sync `vault/modules.json` to the vault bucket so the orchestrator hot-reloads it** (then `asset_library_url` activates in chat citations, FR-003).
+- 2026-06-07: Module-agents Lambda packaged as a **container image** (`agents/lambdas/modules/Dockerfile`, `public.ecr.aws/lambda/python:3.12`, x86_64, handler `agents.lambdas.modules.router.handler`) because it imports `agents.lib` + pyyaml — added a lean `modules` extra (pyyaml) to pyproject. CDK: `ModuleAgentsFunction` added to `infra/stacks/agents.py`.
 
 ## D. References
 - Brief: FRs 010-013, AGENT-03 in Section 6.3

@@ -1,0 +1,247 @@
+"""AGENT-03 — Asset Library (Module 2), Haiku 4.5 tier.
+
+Read-mostly Layer 2 agent. Operations are mechanical S3 reads; ``search`` embeds
+the query with Titan and queries S3 Vectors (no chat-LLM loop needed for a
+retrieval module). Three operations, dispatched from :meth:`handle` on ``op``:
+
+  - ``list_assets``  — enumerate + filter the vault's assets
+  - ``get_asset``    — one asset's rendered body + frontmatter
+  - ``search``       — semantic search over content_type=asset
+
+All AWS clients are injectable so the agent is unit-testable without AWS.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+from typing import Any
+
+import yaml
+from pydantic import BaseModel, Field
+
+from agents.lib import models as lib_models
+
+from .base import ModuleAgent
+
+AGENT_ID = "AGENT-03"
+ASSET_PREFIX = "assets/"
+_FRONTMATTER = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
+
+
+# --- wire models -----------------------------------------------------------
+class AssetSummary(BaseModel):
+    id: str
+    title: str
+    type: str
+    industry: str
+    ai_stage: int
+    tags: list[str] = Field(default_factory=list)
+    file_path: str
+    updated_at: str = ""
+
+
+class AssetDetail(BaseModel):
+    summary: AssetSummary
+    body_markdown: str
+    frontmatter: dict
+
+
+def _split_frontmatter(text: str) -> tuple[dict, str]:
+    m = _FRONTMATTER.match(text)
+    if not m:
+        return {}, text
+    fm = yaml.safe_load(m.group(1)) or {}
+    return (fm if isinstance(fm, dict) else {}), text[m.end() :]
+
+
+def _summary_from_frontmatter(fm: dict, key: str) -> AssetSummary:
+    return AssetSummary(
+        id=str(fm.get("id") or key.rsplit("/", 1)[-1].removesuffix(".md")),
+        title=str(fm.get("title", "")),
+        type=str(fm.get("type", "")),
+        industry=str(fm.get("industry", "")),
+        ai_stage=int(fm.get("ai_stage", 0) or 0),
+        tags=[str(t) for t in (fm.get("tags") or [])],
+        file_path=key,
+        updated_at=str(fm.get("updated_at", "")),
+    )
+
+
+class AssetLibraryAgent(ModuleAgent):
+    agent_id = AGENT_ID
+    model_id = lib_models.HAIKU_4_5
+
+    def __init__(
+        self,
+        *,
+        vault_bucket: str | None = None,
+        vector_bucket: str = "aicoe-content-vectors",
+        index_name: str = "aicoe-content",
+        embed_model: str = lib_models.TITAN_EMBED_V2,
+        region: str = lib_models.REGION,
+        s3: Any = None,
+        s3vectors: Any = None,
+        bedrock: Any = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.vault_bucket = vault_bucket or os.environ.get("VAULT_BUCKET", "")
+        self.vector_bucket = vector_bucket
+        self.index_name = index_name
+        self.embed_model = embed_model
+        self.region = region
+        self._s3 = s3
+        self._s3vectors = s3vectors
+        self._bedrock = bedrock
+
+    # --- lazy clients ------------------------------------------------------
+    @property
+    def s3(self) -> Any:
+        if self._s3 is None:
+            import boto3
+
+            self._s3 = boto3.client("s3", region_name=self.region)
+        return self._s3
+
+    @property
+    def s3vectors(self) -> Any:
+        if self._s3vectors is None:
+            import boto3
+
+            self._s3vectors = boto3.client("s3vectors", region_name=self.region)
+        return self._s3vectors
+
+    @property
+    def bedrock(self) -> Any:
+        if self._bedrock is None:
+            import boto3
+
+            self._bedrock = boto3.client("bedrock-runtime", region_name=self.region)
+        return self._bedrock
+
+    # --- dispatch ----------------------------------------------------------
+    def handle(self, args: dict[str, Any]) -> dict[str, Any]:
+        # The orchestrator builds ``args`` from the LLM, so be liberal in what we
+        # accept: ``id`` is a common alias for ``asset_id``. Op is inferred when
+        # absent (asset_id -> get, query -> search, else browse).
+        if "asset_id" not in args and args.get("id"):
+            args = {**args, "asset_id": args["id"]}
+        op = args.get("op")
+        if op == "get_asset" or (op is None and args.get("asset_id")):
+            return self.run_tool("get_asset", lambda _u: self._get_asset(args))
+        if op == "search" or (op is None and args.get("query")):
+            return self.run_tool("search_vector_index", lambda _u: self._search(args))
+        return self.run_tool("list_assets", lambda _u: self._list_assets(args))
+
+    # --- S3 helpers --------------------------------------------------------
+    def _list_keys(self) -> list[str]:
+        keys: list[str] = []
+        token: str | None = None
+        while True:
+            kw: dict[str, Any] = {"Bucket": self.vault_bucket, "Prefix": ASSET_PREFIX}
+            if token:
+                kw["ContinuationToken"] = token
+            resp = self.s3.list_objects_v2(**kw)
+            for obj in resp.get("Contents", []):
+                key = obj["Key"]
+                # Skip the metadata sidecars and non-markdown.
+                if key.endswith(".md") and "/_metadata/" not in key:
+                    keys.append(key)
+            if not resp.get("IsTruncated"):
+                break
+            token = resp.get("NextContinuationToken")
+        return keys
+
+    def _read(self, key: str) -> str:
+        return self.s3.get_object(Bucket=self.vault_bucket, Key=key)["Body"].read().decode("utf-8")
+
+    # --- operations --------------------------------------------------------
+    def _list_assets(self, args: dict[str, Any]) -> dict[str, Any]:
+        industry = args.get("industry")
+        ai_stage = args.get("ai_stage")
+        asset_type = args.get("asset_type")
+        want_tags = {str(t).lower() for t in (args.get("tags") or [])}
+        query = (args.get("query") or "").strip().lower()
+        limit = int(args.get("limit", 50))
+
+        summaries: list[AssetSummary] = []
+        for key in self._list_keys():
+            fm, _ = _split_frontmatter(self._read(key))
+            s = _summary_from_frontmatter(fm, key)
+            if industry and s.industry != industry:
+                continue
+            if ai_stage is not None and s.ai_stage != int(ai_stage):
+                continue
+            if asset_type and s.type != asset_type:
+                continue
+            if want_tags and not want_tags.issubset({t.lower() for t in s.tags}):
+                continue
+            if query:
+                haystack = f"{s.title} {s.type} {' '.join(s.tags)}".lower()
+                if query not in haystack:
+                    continue
+            summaries.append(s)
+
+        summaries.sort(key=lambda x: (x.industry, x.ai_stage, x.title))
+        return {"status": "ok", "assets": [s.model_dump() for s in summaries[:limit]]}
+
+    def _get_asset(self, args: dict[str, Any]) -> dict[str, Any]:
+        asset_id = args.get("asset_id")
+        if not asset_id:
+            return {"status": "error", "message": "asset_id is required."}
+
+        keys = self._list_keys()
+        # Fast path: slug == id convention (basename match), then verify.
+        basename = f"/{asset_id}.md"
+        candidates = [k for k in keys if k.endswith(basename)] or keys
+        for key in candidates:
+            fm, body = _split_frontmatter(self._read(key))
+            if str(fm.get("id")) == str(asset_id) or key.endswith(basename):
+                detail = AssetDetail(
+                    summary=_summary_from_frontmatter(fm, key),
+                    body_markdown=body.strip(),
+                    frontmatter=fm,
+                )
+                return {"status": "ok", "asset": detail.model_dump()}
+        return {"status": "not_found", "asset_id": asset_id, "message": "No such asset."}
+
+    def _embed(self, text: str) -> list[float]:
+        resp = self.bedrock.invoke_model(
+            modelId=self.embed_model,
+            body=json.dumps(
+                {"inputText": text, "dimensions": lib_models.EMBED_DIMENSIONS, "normalize": True}
+            ),
+        )
+        return json.loads(resp["body"].read())["embedding"]
+
+    def _search(self, args: dict[str, Any]) -> dict[str, Any]:
+        query = (args.get("query") or "").strip()
+        if not query:
+            return {"status": "error", "message": "query is required."}
+        top_k = int(args.get("top_k", 10))
+
+        resp = self.s3vectors.query_vectors(
+            vectorBucketName=self.vector_bucket,
+            indexName=self.index_name,
+            queryVector={"float32": self._embed(query)},
+            topK=max(top_k * 3, top_k),  # over-fetch; filter to assets, dedup by file
+            returnMetadata=True,
+        )
+
+        seen: set[str] = set()
+        summaries: list[AssetSummary] = []
+        for v in resp.get("vectors", []):
+            meta = v.get("metadata", {}) or {}
+            if meta.get("content_type") != "assets":
+                continue
+            key = meta.get("file_path") or v.get("key", "").split("#", 1)[0]
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            fm, _ = _split_frontmatter(self._read(key))
+            summaries.append(_summary_from_frontmatter(fm, key))
+            if len(summaries) >= top_k:
+                break
+        return {"status": "ok", "assets": [s.model_dump() for s in summaries]}

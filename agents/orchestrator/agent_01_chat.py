@@ -130,7 +130,15 @@ TOOL_SPECS: list[dict] = [
                     "type": "object",
                     "properties": {
                         "module_id": {"type": "string"},
-                        "payload": {"type": "object", "description": "Arguments for the module."},
+                        "payload": {
+                            "type": "object",
+                            "description": (
+                                "Arguments for the module's operation. If the module exposes "
+                                "several operations, include an 'op' field naming the operation "
+                                "plus its parameters; otherwise pass the relevant filter fields, "
+                                "an item id, or a natural-language 'query' for semantic search."
+                            ),
+                        },
                     },
                     "required": ["module_id"],
                 }

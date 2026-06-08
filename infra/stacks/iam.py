@@ -152,17 +152,34 @@ class IamStack(Stack):
         self.module_agents_role.add_to_policy(
             iam.PolicyStatement(actions=["lambda:InvokeFunction"], resources=[fn_arn(WORKERS_FN)])
         )
+        # Chat models + Titan: AGENT-03's search embeds the query with Titan, so
+        # InvokeModel must cover the embedding model, not just the chat tiers
+        # (the orchestrator role hit this same gap live).
         self.module_agents_role.add_to_policy(
-            iam.PolicyStatement(actions=["bedrock:InvokeModel"], resources=chat_model_arns)
+            iam.PolicyStatement(
+                actions=["bedrock:InvokeModel"], resources=chat_model_arns + titan_arns
+            )
         )
         self.module_agents_role.add_to_policy(
             iam.PolicyStatement(
                 actions=["s3:GetObject", "s3:PutObject"], resources=[vault_objs, sessions_objs]
             )
         )
+        # ListBucket so a GetObject for a not-yet-created key (e.g. a user profile
+        # sidecar) returns 404 NoSuchKey rather than 403 AccessDenied — the
+        # orchestrator role hit exactly this.
         self.module_agents_role.add_to_policy(
             iam.PolicyStatement(
-                actions=["s3vectors:QueryVectors", "s3vectors:PutVectors"], resources=[vector_index]
+                actions=["s3:ListBucket"],
+                resources=[vault_bucket.bucket_arn, sessions_bucket.bucket_arn],
+            )
+        )
+        self.module_agents_role.add_to_policy(
+            iam.PolicyStatement(
+                # QueryVectors searches; GetVectors fetches matched chunk content for
+                # citations; PutVectors stays for any write-capable future module.
+                actions=["s3vectors:QueryVectors", "s3vectors:GetVectors", "s3vectors:PutVectors"],
+                resources=[vector_index],
             )
         )
         self.module_agents_role.add_to_policy(cw_put_metrics)

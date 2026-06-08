@@ -19,6 +19,11 @@ runtime = [
     "fastapi>=0.110",
     "uvicorn>=0.29",
 ]
+# Module-agents Lambda runtime (AGENT-03+). Core deps (pydantic, boto3) + pyyaml
+# for parsing asset frontmatter (same parser validate_vault.py uses). No FastAPI.
+modules = [
+    "pyyaml>=6.0",
+]
 
 [dependency-groups]
 dev = [

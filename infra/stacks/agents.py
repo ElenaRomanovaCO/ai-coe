@@ -28,9 +28,10 @@ from constructs import Construct
 from . import config
 from .iam import MODULE_AGENTS_FN, ORCHESTRATOR_ENDPOINT_FN
 
-# infra/stacks/agents.py -> repo root (build context for the Docker image).
+# infra/stacks/agents.py -> repo root (build context for the Docker images).
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _DOCKERFILE = "agents/orchestrator/Dockerfile"
+_MODULES_DOCKERFILE = "agents/lambdas/modules/Dockerfile"
 
 
 class AgentsStack(Stack):
@@ -42,6 +43,7 @@ class AgentsStack(Stack):
         vault_bucket: s3.IBucket,
         sessions_bucket: s3.IBucket,
         orchestrator_role: iam.IRole,
+        module_agents_role: iam.IRole,
         guardrail: bedrock.CfnGuardrail,
         **kwargs,
     ) -> None:
@@ -100,3 +102,38 @@ class AgentsStack(Stack):
         self.function_url_value = self.function_url.url
         CfnOutput(self, "OrchestratorFunctionUrl", value=self.function_url.url)
         CfnOutput(self, "OrchestratorFunctionName", value=self.function.function_name)
+
+        # --- Module agents Lambda (AGENT-03+, static dispatch router) ---------
+        # One Lambda hosts all Layer 2 module agents (AD-01). The orchestrator's
+        # invoke_module sends {agent_id, args}; router.py dispatches. Non-streaming,
+        # so a plain handler image (no Lambda Web Adapter). Direct lambda:Invoke
+        # both from the orchestrator and from the web's read-only server actions.
+        module_log_group = logs.LogGroup(
+            self,
+            "ModuleAgentsLogGroup",
+            log_group_name=f"/aws/lambda/{MODULE_AGENTS_FN}",
+            retention=logs.RetentionDays.ONE_MONTH,
+            removal_policy=RemovalPolicy.DESTROY,
+        )
+        self.module_agents_function = lambda_.DockerImageFunction(
+            self,
+            "ModuleAgentsFunction",
+            function_name=MODULE_AGENTS_FN,
+            code=lambda_.DockerImageCode.from_image_asset(
+                directory=str(_REPO_ROOT),
+                file=_MODULES_DOCKERFILE,
+                platform=ecr_assets.Platform.LINUX_AMD64,  # matches orchestrator (x86_64)
+            ),
+            architecture=lambda_.Architecture.X86_64,
+            role=module_agents_role,
+            memory_size=512,
+            timeout=Duration.minutes(2),
+            environment={
+                "VAULT_BUCKET": vault_bucket.bucket_name,
+                "SESSIONS_BUCKET": sessions_bucket.bucket_name,
+                "VECTOR_BUCKET": config.VECTOR_BUCKET_NAME,
+                "VECTOR_INDEX": config.VECTOR_INDEX_NAME,
+            },
+            log_group=module_log_group,
+        )
+        CfnOutput(self, "ModuleAgentsFunctionName", value=self.module_agents_function.function_name)

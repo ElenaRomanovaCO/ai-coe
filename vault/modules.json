@@ -39,7 +39,7 @@
       "agent_id": "AGENT-03",
       "model_tier": "haiku-4-5",
       "worker_ids": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "module-3",
