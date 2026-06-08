@@ -117,6 +117,15 @@ class IamStack(Stack):
                 actions=["s3:GetObject", "s3:PutObject"], resources=[vault_objs, sessions_objs]
             )
         )
+        # ListBucket on the buckets themselves so a GetObject for a not-yet-created
+        # session key returns 404 NoSuchKey (handled as an empty session) rather than
+        # 403 AccessDenied (which crashes the load).
+        self.orchestrator_lambda_role.add_to_policy(
+            iam.PolicyStatement(
+                actions=["s3:ListBucket"],
+                resources=[vault_bucket.bucket_arn, sessions_bucket.bucket_arn],
+            )
+        )
         self.orchestrator_lambda_role.add_to_policy(
             iam.PolicyStatement(actions=["s3vectors:QueryVectors"], resources=[vector_index])
         )
