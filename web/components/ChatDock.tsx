@@ -7,6 +7,7 @@ import { MessageCircle, Send, Square, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getDisplayName } from "@/lib/auth";
+import { OPEN_CHAT_EVENT } from "@/lib/dashboard";
 import { parseSSE } from "@/lib/sse";
 import { cn } from "@/lib/utils";
 
@@ -74,6 +75,14 @@ export function ChatDock() {
       window.sessionStorage.setItem(MESSAGES_KEY, JSON.stringify(messages));
     }
   }, [messages]);
+
+  // The dashboard's "Resume Last Chat" / "Resume" buttons open the dock via this
+  // window event (cross-component, since the dock lives in the layout).
+  useEffect(() => {
+    const open = () => setOpen(true);
+    window.addEventListener(OPEN_CHAT_EVENT, open);
+    return () => window.removeEventListener(OPEN_CHAT_EVENT, open);
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
