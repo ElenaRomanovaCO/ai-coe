@@ -70,11 +70,21 @@ class FakeBedrockEmbed:
 
 
 class FakeS3Vectors:
-    def __init__(self, vectors):
-        self._vectors = vectors
+    def __init__(self, vectors=None, embeddings=None):
+        self._vectors = vectors or []  # query_vectors results
+        self._embeddings = embeddings or {}  # key -> float32 list (get_vectors)
 
     def query_vectors(self, **kwargs):
         return {"vectors": self._vectors}
+
+    def get_vectors(
+        self, *, vectorBucketName, indexName, keys, returnData=False, returnMetadata=False
+    ):
+        out = []
+        for k in keys:
+            if k in self._embeddings:
+                out.append({"key": k, "data": {"float32": self._embeddings[k]}})
+        return {"vectors": out}
 
 
 class FakeMetrics:

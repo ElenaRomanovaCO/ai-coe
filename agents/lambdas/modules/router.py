@@ -20,11 +20,13 @@ from datetime import UTC, datetime
 from typing import Any
 
 from .agent_03_asset_library import AssetLibraryAgent
+from .agent_16_dashboard import DashboardAgent
 from .base import ModuleAgent
 
 # agent_id -> factory. Later module tasks append one line here.
 REGISTRY: dict[str, Callable[[], ModuleAgent]] = {
     "AGENT-03": AssetLibraryAgent,
+    "AGENT-16": DashboardAgent,
 }
 
 
