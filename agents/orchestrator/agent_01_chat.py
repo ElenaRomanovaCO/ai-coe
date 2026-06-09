@@ -24,7 +24,7 @@ from agents.lib.base_agent import BaseAgent, instrumented
 from agents.lib.bedrock_client import BedrockClient
 
 from .cache import ConfigCache
-from .models import ChatRequest, ChatResponse, Citation
+from .models import ChatRequest, ChatResponse, Citation, UIAction
 from .tools import describe_module, list_modules, read_agents_md
 from .tools.invoke_module import ModuleInvoker
 from .tools.search_knowledge_base import KnowledgeBaseSearcher
@@ -163,6 +163,7 @@ class _Accumulator:
 
     citations: list[Citation] = field(default_factory=list)
     invoked_modules: list[str] = field(default_factory=list)
+    ui_actions: list[UIAction] = field(default_factory=list)
 
     def add_citations(self, cites: list[Citation]) -> None:
         seen = {(c.file_path, c.chunk_index) for c in self.citations}
@@ -228,6 +229,27 @@ class ChatOrchestrator(BaseAgent):
             return {"modules": [r.model_dump() for r in rows]}
         if name == "invoke_module":
             module_id = tool_input["module_id"]
+            module = self.cache.registry.by_id(module_id)
+            # Guided-UI modules (those with a ui_route) are not run inline; route the
+            # user to their page via a navigate UIAction the dock renders as a button.
+            if module is not None and module.enabled and module.ui_route:
+                if module_id not in accum.invoked_modules:
+                    accum.invoked_modules.append(module_id)
+                accum.ui_actions.append(
+                    UIAction(
+                        type="navigate",
+                        payload={"route": module.ui_route, "label": f"Open {module.name}"},
+                    )
+                )
+                return {
+                    "status": "open_module",
+                    "module_id": module_id,
+                    "route": module.ui_route,
+                    "message": (
+                        f"Tell the user you're opening the {module.name} module for them, in one "
+                        "short sentence. Do not list steps."
+                    ),
+                }
             result = self.invoker.invoke(module_id, tool_input.get("payload", {}))
             if module_id not in accum.invoked_modules:
                 accum.invoked_modules.append(module_id)
@@ -308,6 +330,7 @@ class ChatOrchestrator(BaseAgent):
                 assistant_message=_extract_text(output_msg),
                 citations=accum.citations,
                 invoked_modules=accum.invoked_modules,
+                ui_actions=accum.ui_actions,
             )
 
         # Tool-turn budget exhausted — return whatever text we have, gracefully.
@@ -317,6 +340,7 @@ class ChatOrchestrator(BaseAgent):
             ),
             citations=accum.citations,
             invoked_modules=accum.invoked_modules,
+            ui_actions=accum.ui_actions,
         )
 
     def _refusal(self, output_msg: dict) -> ChatResponse:
@@ -391,6 +415,7 @@ class ChatOrchestrator(BaseAgent):
                         assistant_message=text_acc,
                         citations=accum.citations,
                         invoked_modules=accum.invoked_modules,
+                        ui_actions=accum.ui_actions,
                     ).model_dump(),
                 }
                 return
@@ -403,6 +428,7 @@ class ChatOrchestrator(BaseAgent):
                     ),
                     citations=accum.citations,
                     invoked_modules=accum.invoked_modules,
+                    ui_actions=accum.ui_actions,
                 ).model_dump(),
             }
         except Exception as exc:  # noqa: BLE001 — surface a clean error event, never a raw stack

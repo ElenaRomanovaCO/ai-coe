@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// "Browse Assets" is live (Module 2). The others are disabled until their modules
-// land (Maturity Assessment = Module 1, Kit Builder = Module 3).
+// Browse Assets (Module 2) and Run Assessment (Module 1) are live. Build Kit is
+// disabled until Module 3 lands.
 export function QuickActionsCard() {
   return (
     <Card className="h-full">
@@ -15,9 +15,12 @@ export function QuickActionsCard() {
         <Link href="/modules/asset-library" className={buttonVariants({ size: "sm" })}>
           Browse Assets
         </Link>
-        <Button variant="outline" size="sm" disabled title="Enabled with Module 1">
+        <Link
+          href="/modules/maturity-assessment"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
           Run Assessment
-        </Button>
+        </Link>
         <Button variant="outline" size="sm" disabled title="Enabled with Module 3">
           Build Kit
         </Button>

@@ -99,6 +99,56 @@ def test_respond_collects_citations_from_search():
     assert searcher.calls == [("healthcare", 5, None)]
 
 
+def test_respond_guided_ui_module_emits_navigate_without_invoking():
+    import copy
+
+    from .conftest import SAMPLE_MODULES
+
+    modules = copy.deepcopy(SAMPLE_MODULES)
+    for m in modules["modules"]:
+        if m["id"] == "module-1":
+            m["enabled"] = True
+            m["ui_route"] = "/modules/maturity-assessment"
+    cache = make_cache(modules=modules)
+
+    fake = FakeLowLevelBedrock(
+        converse_responses=[
+            converse_response(
+                stop_reason="tool_use",
+                content=[
+                    {
+                        "toolUse": {
+                            "toolUseId": "t1",
+                            "name": "invoke_module",
+                            "input": {"module_id": "module-1", "payload": {}},
+                        }
+                    }
+                ],
+            ),
+            converse_response(stop_reason="end_turn", content=[{"text": "Opening it."}]),
+        ]
+    )
+
+    class BoomLambda:
+        def invoke(self, **k):
+            raise AssertionError("ui_route module must not be invoked via Lambda")
+
+    cache_obj = cache
+    agent = ChatOrchestrator(
+        cache=cache_obj,
+        bedrock_client=BedrockClient(client=fake),
+        searcher=StubSearcher([]),
+        invoker=ModuleInvoker(registry_provider=cache_obj, lambda_client=BoomLambda()),
+        guardrail_id=None,
+    )
+    resp = agent.respond(_request("assess my client"))
+    assert resp.invoked_modules == ["module-1"]
+    assert any(
+        a.type == "navigate" and a.payload.get("route") == "/modules/maturity-assessment"
+        for a in resp.ui_actions
+    )
+
+
 def test_respond_invoke_module_records_invoked_and_stub():
     fake = FakeLowLevelBedrock(
         converse_responses=[

@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MessageCircle, Send, Square, X } from "lucide-react";
+import { ArrowRight, MessageCircle, Send, Square, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,10 +20,16 @@ interface Citation {
   score?: number | null;
 }
 
+interface UIAction {
+  type: string;
+  payload: { route?: string; label?: string; [k: string]: unknown };
+}
+
 interface Message {
   role: "user" | "assistant";
   text: string;
   citations?: Citation[];
+  uiActions?: UIAction[];
   pending?: boolean;
   error?: boolean;
 }
@@ -146,12 +153,17 @@ export function ChatDock() {
           const c = ev.data as Citation;
           updateLastAssistant((m) => ({ ...m, citations: [...(m.citations ?? []), c] }));
         } else if (ev.event === "done") {
-          const d = ev.data as { assistant_message?: string; citations?: Citation[] };
+          const d = ev.data as {
+            assistant_message?: string;
+            citations?: Citation[];
+            ui_actions?: UIAction[];
+          };
           updateLastAssistant((m) => ({
             ...m,
             pending: false,
             text: m.text || d.assistant_message || "",
             citations: d.citations?.length ? d.citations : m.citations,
+            uiActions: d.ui_actions?.length ? d.ui_actions : m.uiActions,
           }));
         } else if (ev.event === "error") {
           updateLastAssistant((m) => ({
@@ -271,6 +283,18 @@ function MessageBubble({ message }: { message: Message }) {
             ))}
           </div>
         )}
+        {message.uiActions
+          ?.filter((a) => a.type === "navigate" && a.payload?.route)
+          .map((a, i) => (
+            <Link
+              key={i}
+              href={a.payload.route as string}
+              className="mt-2 inline-flex items-center gap-1 rounded-md bg-neutral-900 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-neutral-800"
+            >
+              {(a.payload.label as string) ?? "Open"}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          ))}
       </div>
     </div>
   );

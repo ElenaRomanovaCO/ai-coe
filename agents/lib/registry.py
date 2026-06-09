@@ -27,6 +27,10 @@ class ModuleEntry(BaseModel):
     model_tier: Literal["haiku-4-5", "sonnet-4-6", "opus-4-7"]
     worker_ids: list[str] = Field(default_factory=list)
     enabled: bool = False
+    # Optional dedicated UI route. When set, the orchestrator routes the user to
+    # this page (a "navigate" UIAction) instead of running the module inline in
+    # chat — for guided, multi-step modules (e.g. the maturity assessment).
+    ui_route: str | None = None
 
 
 class ModuleRegistry(BaseModel):
