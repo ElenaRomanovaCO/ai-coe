@@ -58,6 +58,7 @@ agents = AgentsStack(
     sessions_bucket=storage.sessions_bucket,
     orchestrator_role=iam_stack.orchestrator_lambda_role,
     module_agents_role=iam_stack.module_agents_role,
+    workers_role=iam_stack.workers_role,
     guardrail=guardrails.guardrail,
     env=env,
 )

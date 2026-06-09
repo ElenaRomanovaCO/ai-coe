@@ -37,3 +37,6 @@ infra/.cdk.staging/
 Thumbs.db
 .idea/
 .vscode/
+
+# Deploy logs (Tee-Object output)
+*.log

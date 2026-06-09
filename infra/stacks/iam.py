@@ -203,6 +203,11 @@ class IamStack(Stack):
         self.workers_role.add_to_policy(
             iam.PolicyStatement(actions=["s3:GetObject", "s3:PutObject"], resources=[vault_objs])
         )
+        # ListBucket on the vault so WORKER-03 can enumerate assets (and any worker
+        # GetObject on a missing key returns 404, not 403).
+        self.workers_role.add_to_policy(
+            iam.PolicyStatement(actions=["s3:ListBucket"], resources=[vault_bucket.bucket_arn])
+        )
         self.workers_role.add_to_policy(cw_put_metrics)
         self.workers_role.add_to_policy(
             iam.PolicyStatement(

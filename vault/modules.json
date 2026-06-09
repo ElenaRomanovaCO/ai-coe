@@ -19,7 +19,7 @@
       "agent_id": "AGENT-02",
       "model_tier": "sonnet-4-6",
       "worker_ids": ["WORKER-01", "WORKER-02", "WORKER-03"],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "module-2",
