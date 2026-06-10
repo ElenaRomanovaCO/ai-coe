@@ -57,10 +57,23 @@ class FakeS3:
     def get_object(self, Bucket, Key):
         if Key not in self.objects:
             raise KeyError(Key)
-        return {"Body": io.BytesIO(self.objects[Key].encode("utf-8"))}
+        body = self.objects[Key]
+        data = body if isinstance(body, bytes) else body.encode("utf-8")
+        return {"Body": io.BytesIO(data)}
 
     def put_object(self, Bucket, Key, Body, **kwargs):
-        self.objects[Key] = Body.decode("utf-8") if isinstance(Body, bytes) else Body
+        # Keep text bodies as str (so existing string asserts work); keep binary
+        # (e.g. a kit zip) as bytes.
+        if isinstance(Body, bytes):
+            try:
+                self.objects[Key] = Body.decode("utf-8")
+            except UnicodeDecodeError:
+                self.objects[Key] = Body
+        else:
+            self.objects[Key] = Body
+
+    def generate_presigned_url(self, op, Params, ExpiresIn=3600):
+        return f"https://s3.test/{Params['Key']}?sig=fake&exp={ExpiresIn}"
 
 
 class FakeBedrockEmbed:

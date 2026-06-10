@@ -8,6 +8,10 @@
 > **Blocks:** none
 > **Estimated effort:** 2-3 days solo
 > **Status:** ☐ Not started
+>
+> **🎨 Design references — build the kit builder UI to match these (they take precedence over any UI sketch in the prose below):**
+> - Design system: `ui-designs/design-system.md` · Brief: `ui-designs/pages/08-kit-builder.md`
+> - Mockup: `ui-designs/designs/Engagement Kit Builder.html`
 
 ---
 
@@ -127,6 +131,9 @@ System prompt outline: build a coherent kit, not a random pile. Group by categor
 ---
 
 ## C. Notes & Decisions Log
+- 2026-06-09: **Backend-core DONE** (synth/test/ruff clean, NOT deployed). AGENT-04 (Module 3, registered; module-3 enabled=true + ui_route=/modules/kit-builder for the chat handoff). Mechanical/deterministic (no LLM): ops `preview` (auto-select files across categories → manifest + templated README, no zip), `search_vault` (add/swap picker), `generate` (build zip from edited file list → presigned URL). Selection: architecture+templates from assets (industry + stage±1), governance from regs/, intelligence from feed/, tools from tools/ (PER_CATEGORY caps → ~8-12 files). **Kits write to the SESSIONS bucket** (`kits/{slug}/{ts}/{kit-slug}.zip`), NOT vault, so they aren't re-embedded. README templated (lists each file + rationale + how-to-use). **No new IAM** (module-agents-role already has vault Get/List, sessions Put, bedrock; presigned URL needs no API call). Zip built in-Lambda via `zipfile`. 151 pytest pass (FakeS3 now handles binary bodies + generate_presigned_url).
+- 2026-06-09: REMAINING = UI slice (two-pane: context form + ranked suggestions | kit canvas with remove/reorder + Export .zip, per `ui-designs/pages/08-kit-builder.md`) + deploy (`cdk deploy AiCoE-Agents` rebuilds module image w/ AGENT-04; re-sync modules.json; push). No IAM/new-stack changes → AiCoE-Iam unchanged.
+
 ## D. References
 - Brief: FRs 020-022, AGENT-04
 - Design: Section 5.2 AGENT-04

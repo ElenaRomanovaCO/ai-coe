@@ -21,6 +21,7 @@ from typing import Any
 
 from .agent_02_assessment import AssessmentAgent
 from .agent_03_asset_library import AssetLibraryAgent
+from .agent_04_kit_builder import KitBuilderAgent
 from .agent_16_dashboard import DashboardAgent
 from .base import ModuleAgent
 
@@ -28,6 +29,7 @@ from .base import ModuleAgent
 REGISTRY: dict[str, Callable[[], ModuleAgent]] = {
     "AGENT-02": AssessmentAgent,
     "AGENT-03": AssetLibraryAgent,
+    "AGENT-04": KitBuilderAgent,
     "AGENT-16": DashboardAgent,
 }
 
