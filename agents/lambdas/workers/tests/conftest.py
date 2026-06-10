@@ -34,6 +34,40 @@ ASSET_KEYS = {
 }
 
 
+def _reg(id_, name, geo, scope, tags, clauses=("Overview", "What this means")):
+    scope_list = ", ".join(f'"{s}"' for s in scope)
+    tag_list = ", ".join(f'"{t}"' for t in tags)
+    body = "\n\n".join(f"## {c}\n\nText." for c in clauses)
+    return (
+        f"---\nid: {id_}\nname: {name}\ngeo: {geo}\n"
+        f"industry_scope: [{scope_list}]\nstatus: in-effect\n"
+        f"tags: [{tag_list}]\n---\n\n# {name}\n\n{body}\n"
+    )
+
+
+# Seed-shaped regulation fixtures for WORKER-04 (regulation_finder).
+REG_KEYS = {
+    "regs/eu/ai-act/eu-ai-act.md": _reg(
+        "reg-eu-ai-act", "EU Artificial Intelligence Act", "eu",
+        ["cross-industry", "healthcare", "financial-services"],
+        ["eu", "ai-act", "risk-tiers", "high-risk", "transparency"],
+        ("Risk tiers", "High-risk obligations", "What this means for engagements"),
+    ),
+    "regs/us-federal/hipaa/hipaa-ai.md": _reg(
+        "reg-hipaa-ai", "HIPAA — AI and Protected Health Information", "us-federal",
+        ["healthcare"], ["hipaa", "phi", "healthcare", "privacy", "baa"],
+    ),
+    "regs/eu/gdpr/gdpr-ai.md": _reg(
+        "reg-gdpr-ai", "GDPR — Implications for AI", "eu",
+        ["cross-industry"], ["gdpr", "privacy", "automated-decisions", "dpia", "pii"],
+    ),
+    "regs/us-federal/ffiec/ffiec-ai-financial.md": _reg(
+        "reg-ffiec-ai", "FFIEC — AI in Financial Institutions", "us-federal",
+        ["financial-services"], ["ffiec", "fintech", "model-risk", "banking"],
+    ),
+}
+
+
 class FakeS3:
     def __init__(self, objects: dict[str, str]):
         self.objects = dict(objects)

@@ -13,8 +13,14 @@ def test_non_dict_args_error():
     assert out["status"] == "error"
 
 
-def test_all_three_registered():
-    assert set(router.REGISTRY) == {"WORKER-01", "WORKER-02", "WORKER-03"}
+def test_all_workers_registered():
+    assert set(router.REGISTRY) == {
+        "WORKER-01",
+        "WORKER-02",
+        "WORKER-03",
+        "WORKER-04",
+        "WORKER-05",
+    }
 
 
 def test_route_worker_01():

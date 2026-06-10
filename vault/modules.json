@@ -81,7 +81,8 @@
       "agent_id": "AGENT-05",
       "model_tier": "sonnet-4-6",
       "worker_ids": ["WORKER-04", "WORKER-05"],
-      "enabled": false
+      "enabled": true,
+      "ui_route": "/modules/governance"
     },
     {
       "id": "module-5",

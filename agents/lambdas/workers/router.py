@@ -18,11 +18,15 @@ from .base import Worker
 from .worker_01_question_picker import QuestionPickerWorker
 from .worker_02_scorer import ScorerWorker
 from .worker_03_recommender import RecommenderWorker
+from .worker_04_regulation_finder import RegulationFinderWorker
+from .worker_05_checklist_generator import ChecklistGeneratorWorker
 
 REGISTRY: dict[str, Callable[[], Worker]] = {
     "WORKER-01": QuestionPickerWorker,
     "WORKER-02": ScorerWorker,
     "WORKER-03": RecommenderWorker,
+    "WORKER-04": RegulationFinderWorker,
+    "WORKER-05": ChecklistGeneratorWorker,
 }
 
 
