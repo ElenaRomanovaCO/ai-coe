@@ -107,7 +107,7 @@ Demo outcome: technical-depth surfaces (tools repo, vendor evals, prompts, Q&A).
 | # | Task File | Module | Covers FRs | Agents | Depends On | Status |
 |---|---|---|---|---|---|---|
 | 11 | [11_wave4_skills_tools_repo.md](./11_wave4_skills_tools_repo.md) | Module 7 | 032, 033 | AGENT-08 | 00-10 | ☑ |
-| 12 | [12_wave4_vendor_eval.md](./12_wave4_vendor_eval.md) | Module 13 | 034, 035 | AGENT-13 | 00-11 | ☐ |
+| 12 | [12_wave4_vendor_eval.md](./12_wave4_vendor_eval.md) | Module 13 | 034, 035 | AGENT-13 | 00-11 | ☑ |
 | 13 | [13_wave4_prompt_studio.md](./13_wave4_prompt_studio.md) | Module 11 | 036, 037, 038 | AGENT-11 | 00-12 | ☐ |
 | 14 | [14_wave4_qa.md](./14_wave4_qa.md) | Module 8 | 039, 040, 041 | AGENT-09 | 00-13 | ☐ |
 

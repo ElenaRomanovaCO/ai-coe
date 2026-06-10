@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01, 02
 > **Blocks:** none
 > **Estimated effort:** 2 days solo
-> **Status:** ☐ Not started
+> **Status:** ☑ Done — deployed + live-verified (backend + UI smoke) 2026-06-10
 
 ---
 
@@ -93,6 +93,39 @@ Tools: list_evaluations, get_evaluation, build_comparison, flag_stale (checks `l
 ---
 
 ## C. Notes & Decisions Log
+
+- **2026-06-10 — Deployed + backend-smoked live; user UI smoke pending.** Commits pushed
+  (`0f70f2b..bc2b106`). `cdk deploy AiCoE-Agents` (ModuleAgents +AGENT-13; AiCoE-Iam untouched)
+  → synced modules.json → pushed. Live AGENT-13: `list_evaluations` llm-provider → 2 evals
+  (titles from H1, stale flags); `build_comparison` (llm-doc + embeddings) → deterministic
+  table + 5 real Sonnet insights + comparison_id. (Note: the first "UI smoke passed" report
+  predated the push — pages weren't live yet; re-smoke against the now-deployed UI before ☑.)
+- **2026-06-10 — DONE ☑.** Amplify build green; user re-smoked the live vendor-eval pages
+  (browse/filter + comparison builder table/insights/download). Status + INDEX flipped ☑.
+  FRs 034-035 verified live.
+- **AGENT-13 follows the AGENT-05/24 precedent** (`vault/decisions/agent-05-orchestration.md`):
+  the side-by-side comparison **table is assembled deterministically** from the evaluations'
+  frontmatter, and Sonnet is used for **one thing only** — the 3-5 insights — with a
+  deterministic fallback. `list`/`get`/`flag_stale` never call the model. No workers.
+- **Comparison semantics per the spec's request model:** `build_comparison(evaluation_ids[2-4],
+  criteria?)` compares 2-4 **evaluation entries** (columns), rows = the requested `criteria`
+  subset or the union across selected evals (✓/— cells), plus category / vendors_compared /
+  last_verified / recommendation rows. (The smoke's "GPT-4o + Sonnet + Gemini" are the
+  `vendors_compared` *within* the single LLM eval; the builder compares the eval entries.)
+- **Ephemeral comparisons** — no vault/sessions write, no get/list of past comparisons (matches
+  the spec; the web slice downloads the `comparison_markdown` as a `.md` blob client-side).
+- **Staleness:** `flag_stale` / list `stale` flag uses `last_verified` vs a 90-day window
+  (evals say "re-verify quarterly"). Seeds are ~3 weeks old → none stale today; UI shows the
+  badge when one is.
+- **Title** derived from the body H1 (eval frontmatter has no title field). Detail/compare reuse
+  `MarkdownRenderer` + `FrontmatterPanel` + Task-07 `AssetChatPanelHook`.
+- **No new IAM/infra/decision** — module-agents role already has vault Get/List + Sonnet
+  (region-wildcarded). Deploy just rebuilds the module image.
+- **Verified local:** ruff clean, 248 pytest (+13), vault valid (58), `cdk synth` exit 0, web
+  `pnpm lint` + `build` clean.
+- **Remaining:** deploy (`cdk deploy AiCoE-Agents` → re-sync modules.json → push) + user live
+  smoke (FR-034/035). Then flip Status/INDEX ☑.
+
 ## D. References
 - Brief: FRs 034-035, AGENT-13
 - Foundation: `ai_docs/tasks/00_foundation.md`
