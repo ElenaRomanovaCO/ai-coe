@@ -422,7 +422,8 @@
       "agent_id": "AGENT-20",
       "model_tier": "sonnet-4-6",
       "worker_ids": ["WORKER-08", "WORKER-09"],
-      "enabled": false
+      "enabled": true,
+      "ui_route": "/modules/ethics-checker"
     },
     {
       "id": "module-22",
