@@ -22,6 +22,8 @@ def test_all_workers_registered():
         "WORKER-05",
         "WORKER-08",
         "WORKER-09",
+        "WORKER-12",
+        "WORKER-13",
     }
 
 

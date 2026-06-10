@@ -25,6 +25,7 @@ from .agent_04_kit_builder import KitBuilderAgent
 from .agent_05_governance import GovernanceAgent
 from .agent_16_dashboard import DashboardAgent
 from .agent_20_ethics import EthicsAgent
+from .agent_24_compliance import ComplianceAgent
 from .agent_25_asset_qa import AssetQAAgent
 from .base import ModuleAgent
 
@@ -36,6 +37,7 @@ REGISTRY: dict[str, Callable[[], ModuleAgent]] = {
     "AGENT-05": GovernanceAgent,
     "AGENT-16": DashboardAgent,
     "AGENT-20": EthicsAgent,
+    "AGENT-24": ComplianceAgent,
     "AGENT-25": AssetQAAgent,
 }
 

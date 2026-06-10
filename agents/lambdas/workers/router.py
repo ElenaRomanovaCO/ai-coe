@@ -22,6 +22,8 @@ from .worker_04_regulation_finder import RegulationFinderWorker
 from .worker_05_checklist_generator import ChecklistGeneratorWorker
 from .worker_08_bias_analyzer import BiasAnalyzerWorker
 from .worker_09_regulation_mapper import RegulationMapperWorker
+from .worker_12_reg_summarizer import RegSummarizerWorker
+from .worker_13_applicability_checker import ApplicabilityCheckerWorker
 
 REGISTRY: dict[str, Callable[[], Worker]] = {
     "WORKER-01": QuestionPickerWorker,
@@ -31,6 +33,8 @@ REGISTRY: dict[str, Callable[[], Worker]] = {
     "WORKER-05": ChecklistGeneratorWorker,
     "WORKER-08": BiasAnalyzerWorker,
     "WORKER-09": RegulationMapperWorker,
+    "WORKER-12": RegSummarizerWorker,
+    "WORKER-13": ApplicabilityCheckerWorker,
 }
 
 
