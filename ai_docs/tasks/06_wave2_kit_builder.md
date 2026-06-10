@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01, 02, 03
 > **Blocks:** none
 > **Estimated effort:** 2-3 days solo
-> **Status:** ☐ Not started
+> **Status:** ☑ Done (deployed + smoke-verified live 2026-06-09)
 >
 > **🎨 Design references — build the kit builder UI to match these (they take precedence over any UI sketch in the prose below):**
 > - Design system: `ui-designs/design-system.md` · Brief: `ui-designs/pages/08-kit-builder.md`

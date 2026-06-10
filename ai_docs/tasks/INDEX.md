@@ -54,10 +54,21 @@ Demo outcome: login → browse Asset Library → chat about vault contents → s
 |---|---|---|---|---|---|---|
 | 01 | [01_wave1_vault_seed_content.md](./01_wave1_vault_seed_content.md) | (substrate) | enables retrieval | none | 00 | ☑ |
 | 02 | [02_wave1_chat_orchestrator.md](./02_wave1_chat_orchestrator.md) | Module 9 (Chat) | 002, 003, 006, 007, 008, 009 | AGENT-01 | 00, 01 | ☑ |
-| 03 | [03_wave1_asset_library.md](./03_wave1_asset_library.md) | Module 2 | 010, 011, 012, 013 | AGENT-03 | 00, 01, 02 | ☐ |
-| 04 | [04_wave1_personal_dashboard.md](./04_wave1_personal_dashboard.md) | Module 17 | 014, 015 | AGENT-16 | 00, 01, 02, 03 | ☐ |
+| 03 | [03_wave1_asset_library.md](./03_wave1_asset_library.md) | Module 2 | 010, 011, 012, 013 | AGENT-03 | 00, 01, 02 | ☑ |
+| 04 | [04_wave1_personal_dashboard.md](./04_wave1_personal_dashboard.md) | Module 17 | 014, 015 | AGENT-16 | 00, 01, 02, 03 | ☑ |
 
 **Wave 1 acceptance:** End-to-end demo: login → dashboard → chat asks a vault question with citations → click citation → open asset → return to dashboard.
+
+---
+
+## Wave 1.5 — UI Substrate (inserted)
+
+Cross-cutting UI gaps found after Wave 1: a persistent navigation shell was never built, and pages 00–06 predate the Praxis design mocks. Do **06b before Task 07** (demo-critical, unblocked); **06c** is gated on uploading the self-contained design mocks for pixel-match.
+
+| # | Task File | Scope | Depends On | Status |
+|---|---|---|---|---|
+| 06b | [06b_app_shell_navigation.md](./06b_app_shell_navigation.md) | Persistent app shell + module navigation (per `02-app-shell.md`) | 00, 02, 03, 04 | ◐ |
+| 06c | [06c_wave1_2_ui_alignment.md](./06c_wave1_2_ui_alignment.md) | Align built pages to the Praxis design system + mocks | 06b (+ self-contained design assets) | ☐ |
 
 ---
 
@@ -67,8 +78,8 @@ Demo outcome: run a maturity assessment, build an engagement kit, chat with any 
 
 | # | Task File | Module | Covers FRs | Agents | Depends On | Status |
 |---|---|---|---|---|---|---|
-| 05 | [05_wave2_maturity_assessment.md](./05_wave2_maturity_assessment.md) | Module 1 | 016, 017, 018, 019 | AGENT-02, WORKER-01/02/03 | 00-04 | ☐ |
-| 06 | [06_wave2_kit_builder.md](./06_wave2_kit_builder.md) | Module 3 | 020, 021, 022 | AGENT-04 | 00-05 | ☐ |
+| 05 | [05_wave2_maturity_assessment.md](./05_wave2_maturity_assessment.md) | Module 1 | 016, 017, 018, 019 | AGENT-02, WORKER-01/02/03 | 00-04 | ☑ |
+| 06 | [06_wave2_kit_builder.md](./06_wave2_kit_builder.md) | Module 3 | 020, 021, 022 | AGENT-04 | 00-05 | ☑ |
 | 07 | [07_wave2_universal_asset_qa.md](./07_wave2_universal_asset_qa.md) | Module 26 | 023, 024 | AGENT-25 | 00-06 | ☐ |
 
 **Wave 2 acceptance:** Run assessment via chat → stage + recommendations → build kit from context → download zip → chat with any asset.
