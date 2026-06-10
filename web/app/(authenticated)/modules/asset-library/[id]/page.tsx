@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AssetActions } from "@/components/AssetActions";
+import { AssetChatPanelHook } from "@/components/AssetChatPanelHook";
 import { FrontmatterPanel } from "@/components/FrontmatterPanel";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 
@@ -54,6 +55,12 @@ export default async function AssetDetailPage({
           <MarkdownRenderer>{body_markdown}</MarkdownRenderer>
         </article>
         <aside className="w-full shrink-0 space-y-6 lg:w-72">
+          <AssetChatPanelHook
+            assetId={summary.id}
+            assetTitle={summary.title}
+            assetContent={body_markdown}
+            assetFrontmatter={frontmatter}
+          />
           <section className="rounded-lg border border-neutral-200 p-4">
             <AssetActions assetId={summary.id} initialAggregates={res.aggregates} />
           </section>
