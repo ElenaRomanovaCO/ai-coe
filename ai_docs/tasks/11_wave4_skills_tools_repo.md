@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01 (seeded tools), 02
 > **Blocks:** none
 > **Estimated effort:** 1-2 days solo
-> **Status:** ☐ Not started
+> **Status:** ☑ Done — deployed + live-verified (backend + UI smoke) 2026-06-10
 
 ---
 
@@ -80,6 +80,32 @@ Tools: list_tools (filters: category, stack, stage, cost), get_tool, recommend_t
 ---
 
 ## C. Notes & Decisions Log
+
+- **2026-06-10 — Deployed + backend-smoked live; user UI smoke pending.** Commits pushed.
+  `cdk deploy AiCoE-Agents` (ModuleAgents updated; AiCoE-Iam untouched) → synced modules.json
+  → pushed. Live AGENT-08: `list_tools` vector-db → S3 Vectors + Pinecone; `get_tool` → body;
+  `recommend_tools_for_context` "small RAG pilot" → vector-dbs first. Remaining: user UI smoke
+  (filter category=vector-db; tool detail "Chat with this"), then flip Status/INDEX ☑.
+- **2026-06-10 — DONE ☑.** User UI smoke passed (browse filter + tool detail Chat-with-this).
+  Status + INDEX flipped ☑. FRs 032-033 verified live.
+- **AGENT-08 is a read-only near-clone of AGENT-03** (Haiku, mechanical, no LLM loop, no
+  workers) over `vault/tools/`: `list_tools` (category/stack/stage/cost/tags/query filters),
+  `get_tool` (resolve by frontmatter id w/ basename fallback), `recommend_tools_for_context`
+  (Titan embed → S3 Vectors `content_type=tools` + optional category/stage/cost post-filters).
+  Reuses `agent_03_asset_library._split_frontmatter`.
+- **No write ops** (save/rate/flag) — task defers tool ratings to the Asset Library sidecar
+  pattern (out of scope). Detail page reuses `MarkdownRenderer` + `FrontmatterPanel` +
+  Task-07 `AssetChatPanelHook` (content-agnostic) for scoped Q&A.
+- **No new IAM/infra/decision** — module-agents role already has vault Get/List + Titan +
+  s3vectors Query/Get; AGENT-08 only embeds (no chat model). Deploy just rebuilds the image.
+- **Seed reality:** 6 tools — vector-db ×2 (Pinecone, S3 Vectors; no pgvector), framework ×2
+  (LangChain, LlamaIndex), llm-provider ×1 (Bedrock), orchestration ×1 (Strands). The task's
+  "category=vector-db → Pinecone + S3 Vectors + pgvector" smoke resolves to the 2 seeded ones.
+- **Verified local:** ruff clean, 235 pytest (+11), vault valid (58), `cdk synth` exit 0,
+  web `pnpm lint` + `build` clean.
+- **Remaining:** deploy (`cdk deploy AiCoE-Agents` → re-sync modules.json → push) + user live
+  smoke (FR-032/033). Then flip Status/INDEX ☑.
+
 ## D. References
 - Brief: FRs 032-033, AGENT-08
 - Foundation: `ai_docs/tasks/00_foundation.md`
