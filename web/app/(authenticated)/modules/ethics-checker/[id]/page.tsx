@@ -156,14 +156,23 @@ function RiskRow({ risk }: { risk: BiasRisk }) {
   );
 }
 
-// Frameworks render as non-clickable badges; deep-links to regulation detail pages
-// arrive with Module 25 (Compliance Tracker). reg_id is present only for regs that
-// exist in the vault, so no dangling references either way.
+// Frameworks deep-link to the regulation detail page (Module 25, Compliance Tracker)
+// when a vault reg backs them; reg_id is present only for regs that exist in the vault,
+// so there are no dangling references.
 function FrameworkRow({ framework }: { framework: FrameworkMapping }) {
   return (
     <li>
       <div className="mb-1 flex items-center gap-2">
-        <span className="text-sm font-medium text-neutral-800">{framework.framework}</span>
+        {framework.reg_id ? (
+          <Link
+            href={`/modules/compliance-tracker/${framework.reg_id}`}
+            className="text-sm font-medium text-neutral-800 hover:text-indigo-700 hover:underline"
+          >
+            {framework.framework}
+          </Link>
+        ) : (
+          <span className="text-sm font-medium text-neutral-800">{framework.framework}</span>
+        )}
         <span
           className={cn(
             "rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase",

@@ -153,13 +153,14 @@ function ChecklistRow({
           {item.regulation_links?.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {item.regulation_links.map((rid) => (
-                <span
+                <Link
                   key={rid}
-                  title={rid}
-                  className="rounded border border-neutral-300 bg-white px-1.5 py-0.5 text-[11px] text-neutral-600"
+                  href={`/modules/compliance-tracker/${rid}`}
+                  title={`View ${regName.get(rid) || rid}`}
+                  className="rounded border border-neutral-300 bg-white px-1.5 py-0.5 text-[11px] text-neutral-600 hover:border-indigo-300 hover:text-indigo-700"
                 >
                   {regName.get(rid) || rid}
-                </span>
+                </Link>
               ))}
             </div>
           )}
@@ -172,10 +173,13 @@ function ChecklistRow({
 function RegulationRow({ reg }: { reg: RegulationMatch }) {
   return (
     <li>
-      <div className="flex items-start gap-2">
+      <Link
+        href={`/modules/compliance-tracker/${reg.id}`}
+        className="flex items-start gap-2 rounded-md p-1 hover:bg-neutral-50"
+      >
         <FileText className="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" />
         <div className="min-w-0">
-          <p className="text-sm font-medium text-neutral-800">{reg.name}</p>
+          <p className="text-sm font-medium text-neutral-800 hover:text-indigo-700">{reg.name}</p>
           <p className="truncate text-xs text-neutral-400">{reg.id}</p>
           {reg.applicable_clauses && reg.applicable_clauses.length > 0 && (
             <p className="mt-1 text-xs text-neutral-500">
@@ -183,7 +187,7 @@ function RegulationRow({ reg }: { reg: RegulationMatch }) {
             </p>
           )}
         </div>
-      </div>
+      </Link>
     </li>
   );
 }
