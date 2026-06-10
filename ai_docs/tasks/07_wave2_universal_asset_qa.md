@@ -113,6 +113,10 @@ System prompt outline: you are answering questions about ONE specific asset. The
 ---
 
 ## C. Notes & Decisions Log
+
+- 2026-06-10: Asset Q&A panel transport = non-streaming server action — the panel calls AGENT-25 via `web/app/actions/asset_qa.ts` → `invokeModule`, not the dock's SSE route (AGENT-25 returns one-shot). See `vault/decisions/asset-panel-transport.md`.
+- 2026-06-10: Asset-panel module agents run without a Bedrock guardrail — AGENT-25 refuses off-asset/unsafe requests by system-prompt only (module-agents role lacks `bedrock:ApplyGuardrail`); every later panel inherits this posture. See `vault/decisions/asset-panel-no-guardrail.md`.
+
 ## D. References
 - Brief: FRs 023-024, AGENT-25
 - Design: Section 5.2 AGENT-25
