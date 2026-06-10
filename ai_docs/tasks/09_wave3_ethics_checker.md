@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01, 02
 > **Blocks:** none
 > **Estimated effort:** 2-3 days solo
-> **Status:** ☐ Not started
+> **Status:** ☑ Done — deployed + smoke-passed 2026-06-10
 
 ---
 

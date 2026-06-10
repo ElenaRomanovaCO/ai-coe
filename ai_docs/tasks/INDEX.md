@@ -93,7 +93,7 @@ Demo outcome: complete pre-delivery risk pass (governance check, ethics review, 
 | # | Task File | Module | Covers FRs | Agents | Depends On | Status |
 |---|---|---|---|---|---|---|
 | 08 | [08_wave3_governance_checker.md](./08_wave3_governance_checker.md) | Module 4 | 025, 026 | AGENT-05, WORKER-04/05 | 00-07 | ☑ |
-| 09 | [09_wave3_ethics_checker.md](./09_wave3_ethics_checker.md) | Module 21 | 027, 028 | AGENT-20, WORKER-08/09 | 00-08 | ☐ |
+| 09 | [09_wave3_ethics_checker.md](./09_wave3_ethics_checker.md) | Module 21 | 027, 028 | AGENT-20, WORKER-08/09 | 00-08 | ☑ |
 | 10 | [10_wave3_compliance_tracker.md](./10_wave3_compliance_tracker.md) | Module 25 | 029, 030, 031 | AGENT-24, WORKER-12/13 | 00-09 | ☐ |
 
 **Wave 3 acceptance:** Run governance + ethics + compliance flow for a healthcare or fintech use case end-to-end.
