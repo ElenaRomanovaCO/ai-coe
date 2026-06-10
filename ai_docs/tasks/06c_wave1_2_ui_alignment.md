@@ -7,7 +7,7 @@
 > **Depends on:** 06b (app shell), and the pages from 00/02/03/04/05/06
 > **Blocks:** none (but do before the demo so the product looks coherent)
 > **Estimated effort:** 1–2 days solo
-> **Status:** ◐ Theme pass done (tokens promoted, accent flipped indigo→coral, dock recolored) 2026-06-09 — built + lint/build clean, NOT pushed; awaiting smoke
+> **Status:** ◐ Theme pass done + deployed (Amplify #18) + smoke-passed 2026-06-09 (coral tokens, Hanken, warm canvas — pages inherit). Remaining: full per-page pixel-match, gated on self-contained mocks (only the dock mock is usable).
 >
 > **🎨 Design references — the source of truth for this task:**
 > - Design system: `ui-designs/design-system.md` (wordmark **Praxis**, Hanken Grotesk, indigo, content-type colors, StageIndicator)

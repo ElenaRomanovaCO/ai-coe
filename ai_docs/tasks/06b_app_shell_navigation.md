@@ -7,7 +7,7 @@
 > **Depends on:** 00, 02, 03, 04 (pages to navigate to exist)
 > **Blocks:** 06c (UI alignment slots into this shell); improves every later module page
 > **Estimated effort:** 1 day solo
-> **Status:** ◐ Built + locally verified (lint/build clean) 2026-06-09 — deploy = push only (frontend); not yet pushed
+> **Status:** ☑ Done — deployed (Amplify #16) + smoke-verified live 2026-06-09
 >
 > **🎨 Design references — build to match these (they take precedence over any sketch below):**
 > - Design system: `ui-designs/design-system.md` (wordmark **Praxis**, Hanken Grotesk, indigo)
