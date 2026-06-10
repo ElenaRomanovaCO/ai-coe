@@ -200,7 +200,7 @@ export function ChatDock() {
       <button
         aria-label="Open chat"
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 text-white shadow-lg transition-colors hover:bg-neutral-800"
+        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg transition-colors hover:bg-indigo-700"
       >
         <MessageCircle className="h-6 w-6" />
       </button>
@@ -263,7 +263,7 @@ function MessageBubble({ message }: { message: Message }) {
         className={cn(
           "max-w-[85%] rounded-lg px-3 py-2 text-sm",
           isUser
-            ? "bg-neutral-900 text-white"
+            ? "bg-indigo-600 text-white"
             : message.error
               ? "bg-red-50 text-red-700"
               : "bg-neutral-100 text-neutral-900",
@@ -289,7 +289,7 @@ function MessageBubble({ message }: { message: Message }) {
             <Link
               key={i}
               href={a.payload.route as string}
-              className="mt-2 inline-flex items-center gap-1 rounded-md bg-neutral-900 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-neutral-800"
+              className="mt-2 inline-flex items-center gap-1 rounded-md bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
             >
               {(a.payload.label as string) ?? "Open"}
               <ArrowRight className="h-3.5 w-3.5" />

@@ -68,7 +68,7 @@ Cross-cutting UI gaps found after Wave 1: a persistent navigation shell was neve
 | # | Task File | Scope | Depends On | Status |
 |---|---|---|---|---|
 | 06b | [06b_app_shell_navigation.md](./06b_app_shell_navigation.md) | Persistent app shell + module navigation (per `02-app-shell.md`) | 00, 02, 03, 04 | ◐ |
-| 06c | [06c_wave1_2_ui_alignment.md](./06c_wave1_2_ui_alignment.md) | Align built pages to the Praxis design system + mocks | 06b (+ self-contained design assets) | ☐ |
+| 06c | [06c_wave1_2_ui_alignment.md](./06c_wave1_2_ui_alignment.md) | Align built pages to the Praxis design system + mocks | 06b (+ self-contained design assets) | ◐ |
 
 ---
 

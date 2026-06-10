@@ -1,19 +1,59 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #0a0a0a;
-}
+/*
+ * Praxis design tokens — extracted from ui-designs/designs/Copilot Dock (offline).html
+ * (the only self-contained mock) and promoted here so every page inherits them.
+ *
+ * NOTE: the real Praxis brand is WARM/CORAL, not the indigo/slate that
+ * design-system.md's prose describes (which it flags as an "adjustable starting
+ * point"). To recolor the whole app without editing every file, the Tailwind
+ * `indigo-*` scale is remapped to the coral accent, and `slate-*` / `neutral-*`
+ * are remapped to warm grays. Existing utilities therefore render in-brand.
+ */
+@theme {
+  /* Accent — coral (#e8633f). indigo-600 = accent, indigo-700 = press. */
+  --color-indigo-50: #fbeee9;
+  --color-indigo-100: #f7ddd3;
+  --color-indigo-200: #efc9ba;
+  --color-indigo-500: #f06b44;
+  --color-indigo-600: #e8633f;
+  --color-indigo-700: #c35335;
+  --color-indigo-800: #a8472c;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Semantic aliases (for new components / the dock). */
+  --color-accent: #e8633f;
+  --color-accent-press: #c35335;
+  --color-ink: #221d19;
+  --color-surface: #ffffff;
+  --color-canvas: #f6f1ec;
+
+  /* Warm grays — both slate-* and neutral-* map to the same ramp (hue ~55). */
+  --color-slate-50: #f7f4f2;
+  --color-slate-100: #efeae6;
+  --color-slate-200: #e4ded8;
+  --color-slate-300: #d3cac2;
+  --color-slate-400: #b4a99f;
+  --color-slate-500: #8c8178;
+  --color-slate-600: #6b6159;
+  --color-slate-700: #4e453e;
+  --color-slate-800: #352e29;
+  --color-slate-900: #221d19;
+
+  --color-neutral-50: #f7f4f2;
+  --color-neutral-100: #efeae6;
+  --color-neutral-200: #e4ded8;
+  --color-neutral-300: #d3cac2;
+  --color-neutral-400: #b4a99f;
+  --color-neutral-500: #8c8178;
+  --color-neutral-600: #6b6159;
+  --color-neutral-700: #4e453e;
+  --color-neutral-800: #352e29;
+  --color-neutral-900: #221d19;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Warm cream canvas; white cards (surface) sit on top. Font comes from
+     next/font (Hanken Grotesk) applied to <html> — inherited here. */
+  background: var(--color-canvas);
+  color: var(--color-ink);
 }
