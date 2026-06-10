@@ -140,6 +140,10 @@ Tools: invoke_worker (WORKER-04), invoke_worker (WORKER-05), write_governance_re
 ---
 
 ## C. Notes & Decisions Log
+
+- 2026-06-10: AGENT-05 orchestration = mechanical worker pipeline (WORKER-04 → WORKER-05) + one Sonnet call for the exec summary only, NOT a Converse tool-loop. Risk logic stays deterministic/testable; sets the Wave-3+ precedent for worker-orchestrating agents. See `vault/decisions/agent-05-orchestration.md`.
+- 2026-06-10: WORKER-04 uses a deterministic structured-filter + keyword-relevance pass over `vault/regs/` (with an industry gate so an industry-specific reg doesn't surface for a different industry on shared geography alone; data types still pull regs in cross-industry, e.g. PHI → HIPAA) rather than vector search — consistent with the deterministic worker pattern (WORKER-03).
+
 ## D. References
 - Brief: FRs 025-026, AGENT-05, WORKER-04/05
 - Design: Section 5.2 AGENT-05
