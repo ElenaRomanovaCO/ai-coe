@@ -25,11 +25,15 @@ CHAT_MODEL_IDS = [SONNET_4_6, HAIKU_4_5, OPUS_4_7]
 
 
 def foundation_model_arn(model_id: str) -> str:
-    # Foundation-model ARNs are account-less.
-    return f"arn:aws:bedrock:{REGION}::foundation-model/{model_id}"
+    # Account-less, and region-wildcarded: a `us.` cross-region inference profile
+    # routes Converse to any of us-east-1 / us-east-2 / us-west-2, and InvokeModel is
+    # authorized against the foundation-model resource in whichever region it lands.
+    # Pinning us-east-1 here caused AccessDenied when the profile routed to us-east-2.
+    return f"arn:aws:bedrock:*::foundation-model/{model_id}"
 
 
 def inference_profile_arn(account: str, model_id: str) -> str:
+    # The inference profile itself is regional to the caller (us-east-1).
     return f"arn:aws:bedrock:{REGION}:{account}:inference-profile/us.{model_id}"
 
 
