@@ -7,6 +7,10 @@
 > **Blocks:** every other task file in this suite
 > **Estimated effort:** 4-6 days solo
 > **Status:** ☐ Not started
+>
+> **🎨 Design references — build the login UI to match these (they take precedence over any UI sketch in the prose below):**
+> - Design system: `ui-designs/design-system.md` · Brief: `ui-designs/pages/01-login.md`
+> - Mockups: `ui-designs/designs/Login (1).html`, `ui-designs/designs/Login States.html`, `ui-designs/designs/Login Backgrounds.html`
 
 ---
 

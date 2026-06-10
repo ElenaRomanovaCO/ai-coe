@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-radius="rounded">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Praxis — Copilot dock</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;550;600;650;700&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="app-shell/styles.css" />
+<link rel="stylesheet" href="copilot/copilot.css" />
+
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#f8ede6">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#f8ede6" />
+    <rect x="470" y="250" width="260" height="260" rx="64" fill="#e8633f" />
+    <path d="M600 318c14 44 24 54 68 68-44 14-54 24-68 68-14-44-24-54-68-68 44-14 54-24 68-68z" fill="#ffffff" />
+    <circle cx="690" cy="330" r="14" fill="#ffffff" />
+  </svg>
+</template>
+
+<div id="cop-root"></div>
+
+<script type="text/babel" src="app-shell/icon.jsx"></script>
+<script type="text/babel" src="copilot/copilot.jsx"></script>
+</body>
+</html>

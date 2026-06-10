@@ -8,6 +8,10 @@
 > **Blocks:** every module task (each module needs Chat to invoke its agent)
 > **Estimated effort:** 4-5 days solo
 > **Status:** ☐ Not started
+>
+> **🎨 Design references — build the chat dock + app shell UI to match these (they take precedence over any UI sketch in the prose below):**
+> - Design system: `ui-designs/design-system.md` · Briefs: `ui-designs/pages/03-chat-dock.md`, `ui-designs/pages/02-app-shell.md`
+> - Mockups: `ui-designs/designs/Copilot Dock (offline).html` (full self-contained render), `ui-designs/designs/Copilot (1).html`, `ui-designs/designs/App Shell (1).html`
 
 ---
 

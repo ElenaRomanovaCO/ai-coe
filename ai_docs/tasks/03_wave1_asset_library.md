@@ -8,6 +8,10 @@
 > **Blocks:** any task that links to Asset Library entries (Chat citations, Kit Builder, Recommendations)
 > **Estimated effort:** 2-3 days solo
 > **Status:** ☐ Not started
+>
+> **🎨 Design references — build the asset library UI to match these (they take precedence over any UI sketch in the prose below):**
+> - Design system: `ui-designs/design-system.md` · Briefs: `ui-designs/pages/04-asset-library.md`, `ui-designs/pages/05-asset-detail.md`
+> - Mockups: `ui-designs/designs/Asset Library Browse (1).html`, `ui-designs/designs/Asset Detail (1).html`
 
 ---
 

@@ -8,6 +8,10 @@
 > **Blocks:** none (other modules add cards to dashboard but dashboard works standalone)
 > **Estimated effort:** 2 days solo
 > **Status:** ☐ Not started
+>
+> **🎨 Design references — build the dashboard UI to match these (they take precedence over any UI sketch in the prose below):**
+> - Design system: `ui-designs/design-system.md` · Briefs: `ui-designs/pages/06-dashboard.md`, `ui-designs/pages/02-app-shell.md`
+> - Mockups: `ui-designs/designs/Dashboard Home.html`, `ui-designs/designs/App Shell (1).html`
 
 ---
 
