@@ -23,6 +23,7 @@ from .agent_02_assessment import AssessmentAgent
 from .agent_03_asset_library import AssetLibraryAgent
 from .agent_04_kit_builder import KitBuilderAgent
 from .agent_16_dashboard import DashboardAgent
+from .agent_25_asset_qa import AssetQAAgent
 from .base import ModuleAgent
 
 # agent_id -> factory. Later module tasks append one line here.
@@ -31,6 +32,7 @@ REGISTRY: dict[str, Callable[[], ModuleAgent]] = {
     "AGENT-03": AssetLibraryAgent,
     "AGENT-04": KitBuilderAgent,
     "AGENT-16": DashboardAgent,
+    "AGENT-25": AssetQAAgent,
 }
 
 

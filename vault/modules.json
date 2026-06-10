@@ -521,7 +521,7 @@
       "agent_id": "AGENT-25",
       "model_tier": "sonnet-4-6",
       "worker_ids": [],
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "module-27",
