@@ -3,8 +3,8 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Browse Assets (Module 2), Run Assessment (Module 1), Build Kit (Module 3), and
-// Governance Check (Module 4) are all live.
+// Browse Assets (Module 2), Run Assessment (Module 1), Build Kit (Module 3),
+// Governance Check (Module 4), and Ethics Review (Module 21) are all live.
 export function QuickActionsCard() {
   return (
     <Card className="h-full">
@@ -32,6 +32,12 @@ export function QuickActionsCard() {
           className={buttonVariants({ variant: "outline", size: "sm" })}
         >
           Governance Check
+        </Link>
+        <Link
+          href="/modules/ethics-checker"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          Ethics Review
         </Link>
       </CardContent>
     </Card>
