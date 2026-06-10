@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01, 02; soft-depends on 10 (Compliance Tracker) for richer links
 > **Blocks:** none directly; later modules (Project Health, Ethics) reference governance reviews
 > **Estimated effort:** 2-3 days solo
-> **Status:** ☐ Not started
+> **Status:** ☑ Done — deployed + smoke-passed 2026-06-10
 
 ---
 
