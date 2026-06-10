@@ -142,7 +142,8 @@
       "agent_id": "AGENT-08",
       "model_tier": "haiku-4-5",
       "worker_ids": [],
-      "enabled": false
+      "enabled": true,
+      "ui_route": "/modules/tools-repo"
     },
     {
       "id": "module-8",
