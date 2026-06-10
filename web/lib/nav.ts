@@ -89,7 +89,7 @@ export const NAV_GROUPS: NavGroup[] = [
         enabled: true,
         purpose: "Place a client on the 0–5 AI maturity curve.",
       },
-      { id: "module-4", label: "Governance & Risk", wave: 3, icon: ShieldCheck, enabled: false, purpose: "Check use cases against AI controls." },
+      { id: "module-4", label: "Governance & Risk", wave: 3, icon: ShieldCheck, route: "/modules/governance", enabled: true, purpose: "Check use cases against AI controls." },
       { id: "module-21", label: "Ethics & Bias Checker", wave: 3, icon: Scale, enabled: false, purpose: "Flag ethics & bias risks." },
       { id: "module-25", label: "Compliance Tracker", wave: 3, icon: ClipboardCheck, enabled: false, purpose: "Global AI regulation tracker." },
       { id: "module-18", label: "Project Health", wave: 5, icon: Activity, enabled: false, purpose: "Monitor AI project health." },
