@@ -223,7 +223,8 @@
       "agent_id": "AGENT-11",
       "model_tier": "sonnet-4-6",
       "worker_ids": [],
-      "enabled": false
+      "enabled": true,
+      "ui_route": "/modules/prompt-studio"
     },
     {
       "id": "module-12",
