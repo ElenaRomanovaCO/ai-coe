@@ -80,7 +80,7 @@ Demo outcome: run a maturity assessment, build an engagement kit, chat with any 
 |---|---|---|---|---|---|---|
 | 05 | [05_wave2_maturity_assessment.md](./05_wave2_maturity_assessment.md) | Module 1 | 016, 017, 018, 019 | AGENT-02, WORKER-01/02/03 | 00-04 | ☑ |
 | 06 | [06_wave2_kit_builder.md](./06_wave2_kit_builder.md) | Module 3 | 020, 021, 022 | AGENT-04 | 00-05 | ☑ |
-| 07 | [07_wave2_universal_asset_qa.md](./07_wave2_universal_asset_qa.md) | Module 26 | 023, 024 | AGENT-25 | 00-06 | ☐ |
+| 07 | [07_wave2_universal_asset_qa.md](./07_wave2_universal_asset_qa.md) | Module 26 | 023, 024 | AGENT-25 | 00-06 | ☑ |
 
 **Wave 2 acceptance:** Run assessment via chat → stage + recommendations → build kit from context → download zip → chat with any asset.
 

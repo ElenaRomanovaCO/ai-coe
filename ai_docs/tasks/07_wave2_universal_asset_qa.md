@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01, 02, 03
 > **Blocks:** none (other modules can opt into the chat panel pattern)
 > **Estimated effort:** 2 days solo
-> **Status:** ☐ Not started
+> **Status:** ☑ Done — deployed + smoke-passed 2026-06-10
 
 ---
 
