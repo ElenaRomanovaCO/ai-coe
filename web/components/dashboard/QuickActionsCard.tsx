@@ -45,6 +45,12 @@ export function QuickActionsCard() {
         >
           Skills Exchange
         </Link>
+        <Link
+          href="/modules/roi-calculator"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          ROI Calculator
+        </Link>
       </CardContent>
     </Card>
   );
