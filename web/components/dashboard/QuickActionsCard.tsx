@@ -51,6 +51,12 @@ export function QuickActionsCard() {
         >
           ROI Calculator
         </Link>
+        <Link
+          href="/modules/sow-generator"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          SOW Generator
+        </Link>
       </CardContent>
     </Card>
   );
