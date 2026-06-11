@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 // AI mode: ask a natural-language question, get a synthesized answer with citations
 // from across the Knowledge Base, then optionally save it as a community thread.
-export function AiAsk() {
+export function AiAsk({ initialQuestion = "" }: { initialQuestion?: string }) {
   const router = useRouter();
   const name = useSyncExternalStore(
     () => () => {},
@@ -27,7 +27,7 @@ export function AiAsk() {
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const [question, setQuestion] = useState("");
+  const [question, setQuestion] = useState(initialQuestion);
   const [asking, setAsking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnswerResult | null>(null);

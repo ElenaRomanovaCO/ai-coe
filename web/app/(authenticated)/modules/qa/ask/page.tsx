@@ -5,7 +5,12 @@ import { AiAsk } from "@/components/qa/AiAsk";
 
 export const dynamic = "force-dynamic";
 
-export default function AskPage() {
+export default async function AskPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
   return (
     <div className="mx-auto max-w-3xl">
       <nav className="mb-4 text-sm text-neutral-500">
@@ -27,7 +32,7 @@ export default function AskPage() {
         </p>
       </div>
 
-      <AiAsk />
+      <AiAsk initialQuestion={q ?? ""} />
     </div>
   );
 }

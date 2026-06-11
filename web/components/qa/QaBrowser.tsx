@@ -8,7 +8,7 @@ import { ArrowBigUp, MessageSquarePlus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getDisplayName } from "@/lib/auth";
-import { SORT_OPTIONS, type ThreadSummary } from "@/lib/qa";
+import { SORT_OPTIONS, SUGGESTED_QUESTIONS, type ThreadSummary } from "@/lib/qa";
 import { cn } from "@/lib/utils";
 
 import { postThread } from "@/app/(authenticated)/modules/qa/actions";
@@ -50,6 +50,28 @@ export function QaBrowser({ threads }: { threads: ThreadSummary[] }) {
 
   return (
     <div className="space-y-5">
+      <section className="rounded-lg border border-indigo-100 bg-indigo-50/50 p-4">
+        <div className="mb-2 flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-indigo-600" />
+          <h2 className="text-sm font-semibold text-neutral-800">Ask AI a question</h2>
+        </div>
+        <p className="mb-3 text-xs text-neutral-500">
+          Get a synthesized answer with citations from across the Knowledge Base. Try one of these:
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {SUGGESTED_QUESTIONS.map((q) => (
+            <button
+              key={q}
+              type="button"
+              onClick={() => router.push(`/modules/qa/ask?q=${encodeURIComponent(q)}`)}
+              className="rounded-full border border-neutral-300 bg-white px-3 py-1 text-sm text-neutral-600 transition-colors hover:border-indigo-400 hover:text-indigo-700"
+            >
+              {q}
+            </button>
+          ))}
+        </div>
+      </section>
+
       <div className="flex flex-wrap items-center gap-2">
         <Input
           placeholder="Search questions…"
