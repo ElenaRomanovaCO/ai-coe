@@ -7,7 +7,14 @@
 > **Depends on:** 00, 01, 02, 18 (engagements)
 > **Blocks:** none
 > **Estimated effort:** 1-2 days solo
-> **Status:** ☑ Built + verified locally (2026-06-11); commit/deploy pending review
+> **Status:** ☑ DONE — deployed + live-verified (2026-06-11). Backend AGENT-15 + the
+> orchestrator `insight` content type deployed (image-only diff, no IAM change). Live smoke:
+> write_retro → Sonnet extracted **4 generic insights** (process/pattern/tooling/risk),
+> asset_link correctly resolved to a real `patterns_used` asset for 2 and None for the rest;
+> insight files confirmed `content_type: insight` with **no** generated flag (→ chat-
+> retrievable, FR-055), retro generated-flagged. Amplify #41 SUCCEED on `e47137e`;
+> retros list/new/[id] serve. (nav.ts/modules.json git-commit deferred — they carry an
+> unrelated design/planning WIP; module-16 synced to S3 for the live deploy.)
 
 ---
 

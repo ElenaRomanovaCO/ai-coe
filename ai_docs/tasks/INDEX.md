@@ -124,9 +124,11 @@ Demo outcome: feed + ideation + decisions + project health + retros + benchmarks
 | 15 | [15_wave5_intelligence_feed.md](./15_wave5_intelligence_feed.md) | Module 24 | 042, 043, 044 | AGENT-23, WORKER-10/11 | 00-14 | ☑ |
 | 16 | [16_wave5_use_case_ideation.md](./16_wave5_use_case_ideation.md) | Module 12 | 045, 046, 047 | AGENT-12 | 00-15 | ☑ |
 | **16b** | [16b_wave5_agentic_skills_plugin_exchange.md](./16b_wave5_agentic_skills_plugin_exchange.md) | **Module 28** | 078, 079, 080 | AGENT-27 | 00-16 | ☑ |
+| 16c | [16c_wave5_ai_roi_calculator.md](./16c_wave5_ai_roi_calculator.md) | Module 29 | 081, 082, 083 | AGENT-28 | 00-16 | ☐ |
+| 16d | [16d_wave5_ai_sow_generator.md](./16d_wave5_ai_sow_generator.md) | Module 30 | 084, 085, 086 | AGENT-29 | 00-16 | ☐ |
 | 17 | [17_wave5_decision_log.md](./17_wave5_decision_log.md) | Module 19 | 048, 049, 050 | AGENT-18 | 00-16 | ☐ |
 | 18 | [18_wave5_project_health.md](./18_wave5_project_health.md) | Module 18 | 051, 052, 053 | AGENT-17 | 00-17 | ☑ |
-| 19 | [19_wave5_retrospective.md](./19_wave5_retrospective.md) | Module 16 | 054, 055 | AGENT-15 | 00-18 | ☐ |
+| 19 | [19_wave5_retrospective.md](./19_wave5_retrospective.md) | Module 16 | 054, 055 | AGENT-15 | 00-18 | ☑ |
 | 20 | [20_wave5_benchmark.md](./20_wave5_benchmark.md) | Module 22 | 056, 057 | AGENT-21 | 00-19 | ☐ |
 
 **Wave 5 acceptance:** Feed personalization shifts with profile; ideation produces ranked candidates; decision similarity surfaces precedent; project health flags risks; retros extract insights; benchmark renders + exports.
