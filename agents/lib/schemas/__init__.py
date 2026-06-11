@@ -97,6 +97,25 @@ class FeedItemFrontmatter(BaseModel):
     radar_status: Literal["adopt", "trial", "assess", "hold"] | None = None
 
 
+class ExchangeFrontmatter(BaseModel):
+    """An Agentic Skills & Plugin Exchange entry (Module 28). Read-only catalog.
+
+    ``content_type: exchange`` is REQUIRED on every entry so these never pollute
+    asset/content search (the ReEmbed pipeline derives the same value from the
+    ``exchange/`` folder; AGENT-27 search filters on it).
+    """
+
+    id: str
+    content_type: Literal["exchange"]
+    name: str
+    tool: Literal["claude-code", "claude-cowork", "copilot", "kiro", "generic"]
+    category: Literal["skill", "slash-command", "mcp-server", "plugin", "prompt-pack", "config"]
+    summary: str
+    tags: list[str] = []
+    install: str = ""
+    source_url: str = ""
+
+
 class PromptFrontmatter(BaseModel):
     id: str
     title: str
@@ -146,6 +165,7 @@ CONTENT_TYPE_BY_FOLDER: dict[str, tuple[str, type[BaseModel]]] = {
     "vendors": ("vendor", VendorEvalFrontmatter),
     "regs": ("regulation", RegulationFrontmatter),
     "feed": ("feed", FeedItemFrontmatter),
+    "exchange": ("exchange", ExchangeFrontmatter),
     "prompts": ("prompt", PromptFrontmatter),
     "qa": ("qa-thread", QaThreadFrontmatter),
     "assessments": ("assessment", SampleDocFrontmatter),

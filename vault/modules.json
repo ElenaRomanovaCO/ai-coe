@@ -385,9 +385,10 @@
         "Show decisions related to vector databases"
       ],
       "agent_id": "AGENT-18",
-      "model_tier": "sonnet-4-6",
+      "model_tier": "haiku-4-5",
       "worker_ids": [],
-      "enabled": false
+      "enabled": false,
+      "ui_route": "/modules/decisions"
     },
     {
       "id": "module-20",
@@ -534,7 +535,7 @@
     },
     {
       "id": "module-27",
-      "name": "Claude Code Development Accelerator",
+      "name": "Agentic Development Accelerator",
       "wave": 7,
       "purpose": "Generate scaffolded starter code from a reference architecture (Opus, cost-capped).",
       "when_to_use": [
@@ -551,6 +552,27 @@
       "model_tier": "opus-4-7",
       "worker_ids": ["WORKER-14", "WORKER-15", "WORKER-16"],
       "enabled": false
+    },
+    {
+      "id": "module-28",
+      "name": "Agentic Skills & Plugin Exchange",
+      "wave": 5,
+      "purpose": "Browse and install reusable agentic-dev skills, slash-commands, MCP servers, and plugin/prompt packs for Claude Code, Claude Cowork, GitHub Copilot, and Kiro.",
+      "when_to_use": [
+        "User wants a Claude Code skill, slash-command, or MCP server for a task",
+        "User asks what plugins or prompt packs exist for an agentic dev tool",
+        "User needs install steps for a shared skill or extension"
+      ],
+      "example_queries": [
+        "Find a Claude Code skill for security review",
+        "What MCP servers do we have for AWS?",
+        "Show Copilot setups for our standard stack"
+      ],
+      "agent_id": "AGENT-27",
+      "model_tier": "haiku-4-5",
+      "worker_ids": [],
+      "ui_route": "/modules/exchange",
+      "enabled": true
     }
   ]
 }
