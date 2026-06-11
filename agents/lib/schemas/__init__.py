@@ -107,6 +107,24 @@ class PromptFrontmatter(BaseModel):
     parent_id: str | None = None
 
 
+class QaAnswer(BaseModel):
+    id: str
+    text: str
+    posted_by: str = "demo"
+    posted_at: str
+
+
+class QaThreadFrontmatter(BaseModel):
+    """A community Q&A thread. Answers live as a structured list in the same file."""
+
+    id: str
+    question: str
+    tags: list[str] = []
+    posted_by: str = "demo"
+    posted_at: str
+    answers: list[QaAnswer] = []
+
+
 class SampleDocFrontmatter(BaseModel):
     """Light schema for demo-continuity samples (assessments, kits, decisions).
 
@@ -129,6 +147,7 @@ CONTENT_TYPE_BY_FOLDER: dict[str, tuple[str, type[BaseModel]]] = {
     "regs": ("regulation", RegulationFrontmatter),
     "feed": ("feed", FeedItemFrontmatter),
     "prompts": ("prompt", PromptFrontmatter),
+    "qa": ("qa-thread", QaThreadFrontmatter),
     "assessments": ("assessment", SampleDocFrontmatter),
     "kits": ("kit", SampleDocFrontmatter),
     "decisions": ("decision", SampleDocFrontmatter),

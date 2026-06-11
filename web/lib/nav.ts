@@ -70,7 +70,7 @@ export const NAV_GROUPS: NavGroup[] = [
         enabled: true,
         purpose: "Browse curated AI delivery assets.",
       },
-      { id: "module-8", label: "Q&A", wave: 4, icon: MessagesSquare, enabled: false, purpose: "Cited answers from the vault." },
+      { id: "module-8", label: "Q&A", wave: 4, icon: MessagesSquare, route: "/modules/qa", enabled: true, purpose: "Cited answers from the vault." },
       { id: "module-26", label: "Universal Asset Q&A", wave: 2, icon: MessagesSquare, enabled: false, purpose: "Ask questions against any asset." },
       { id: "module-7", label: "Tools Repository", wave: 4, icon: Wrench, route: "/modules/tools-repo", enabled: true, purpose: "Tool & framework recommendations." },
       { id: "module-13", label: "Vendor & Model Eval", wave: 4, icon: Boxes, route: "/modules/vendor-eval", enabled: true, purpose: "Compare vendors and models." },

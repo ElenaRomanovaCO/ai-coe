@@ -163,7 +163,8 @@
       "agent_id": "AGENT-09",
       "model_tier": "sonnet-4-6",
       "worker_ids": [],
-      "enabled": false
+      "enabled": true,
+      "ui_route": "/modules/qa"
     },
     {
       "id": "module-9",
