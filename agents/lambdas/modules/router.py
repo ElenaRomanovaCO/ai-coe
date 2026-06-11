@@ -29,6 +29,7 @@ from .agent_11_prompts import PromptStudioAgent
 from .agent_12_ideation import IdeationAgent
 from .agent_13_vendor_eval import VendorEvalAgent
 from .agent_16_dashboard import DashboardAgent
+from .agent_18_decisions import DecisionsAgent
 from .agent_20_ethics import EthicsAgent
 from .agent_23_feed import FeedAgent
 from .agent_24_compliance import ComplianceAgent
@@ -47,6 +48,7 @@ REGISTRY: dict[str, Callable[[], ModuleAgent]] = {
     "AGENT-12": IdeationAgent,
     "AGENT-13": VendorEvalAgent,
     "AGENT-16": DashboardAgent,
+    "AGENT-18": DecisionsAgent,
     "AGENT-20": EthicsAgent,
     "AGENT-23": FeedAgent,
     "AGENT-24": ComplianceAgent,
