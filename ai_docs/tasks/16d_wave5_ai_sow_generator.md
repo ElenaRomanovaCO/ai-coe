@@ -7,7 +7,12 @@
 > **Depends on:** 00, 01, 03 (can seed scope from an asset/reference), 16c (shares the engagement-economics inputs; optional)
 > **Blocks:** none
 > **Estimated effort:** ~1.5 days solo
-> **Status:** ☑ Built + verified locally (2026-06-11); commit/deploy pending review
+> **Status:** ☑ DONE — deployed + live-verified (2026-06-11). AGENT-29 deployed (image-only
+> diff, no IAM change); module-30 synced to S3. Live smoke: generate (6-week fraud-scoring
+> pilot) → SOW with 7-section TOC, deliverables/milestones/pricing **verbatim**, a grounded
+> Sonnet objectives narrative; **presigned export GET returned HTTP 200 (text/markdown, 3.4KB)**
+> — FR-086 verified. Amplify #45 SUCCEED (commit `4450ff8`, bundled with the UI rebrand);
+> sow-generator + [id] serve; dashboard Quick Action live.
 
 ---
 
