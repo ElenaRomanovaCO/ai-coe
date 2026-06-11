@@ -35,6 +35,7 @@ export const TOOL_LABELS: Record<string, string> = {
   "claude-cowork": "Claude Cowork",
   copilot: "GitHub Copilot",
   kiro: "Kiro",
+  google: "Google",
   generic: "Cross-tool",
 };
 
@@ -60,6 +61,7 @@ export const TOOL_STYLE: Record<string, string> = {
   "claude-cowork": "bg-violet-100 text-violet-700 border-violet-200",
   copilot: "bg-sky-100 text-sky-700 border-sky-200",
   kiro: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  google: "bg-blue-100 text-blue-700 border-blue-200",
   generic: "bg-neutral-100 text-neutral-600 border-neutral-200",
 };
 

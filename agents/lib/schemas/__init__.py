@@ -108,7 +108,7 @@ class ExchangeFrontmatter(BaseModel):
     id: str
     content_type: Literal["exchange"]
     name: str
-    tool: Literal["claude-code", "claude-cowork", "copilot", "kiro", "generic"]
+    tool: Literal["claude-code", "claude-cowork", "copilot", "kiro", "google", "generic"]
     category: Literal["skill", "slash-command", "mcp-server", "plugin", "prompt-pack", "config"]
     summary: str
     tags: list[str] = []
