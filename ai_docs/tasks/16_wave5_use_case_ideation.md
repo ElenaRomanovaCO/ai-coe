@@ -7,7 +7,11 @@
 > **Depends on:** 00, 01, 02
 > **Blocks:** none
 > **Estimated effort:** 2 days solo
-> **Status:** ☑ Built + verified locally (2026-06-11); commit/deploy pending review
+> **Status:** ☑ DONE — deployed + live-verified (2026-06-11). Backend: AiCoE-Agents
+> redeployed (image-only diff, no IAM change); live `generate` smoke returned 7 ranked
+> candidates, all with AGENT-03 reference assets — confirms Sonnet generation + vector
+> search work on the deployed Lambda. Frontend: Amplify build #33 SUCCEED on `73e24d9`;
+> ideation form + results routes serve (gated 307 → /login).
 
 ---
 
