@@ -37,6 +37,7 @@ from .agent_23_feed import FeedAgent
 from .agent_24_compliance import ComplianceAgent
 from .agent_25_asset_qa import AssetQAAgent
 from .agent_27_exchange import ExchangeAgent
+from .agent_28_roi import RoiCalculatorAgent
 from .base import ModuleAgent
 
 # agent_id -> factory. Later module tasks append one line here.
@@ -59,6 +60,7 @@ REGISTRY: dict[str, Callable[[], ModuleAgent]] = {
     "AGENT-24": ComplianceAgent,
     "AGENT-25": AssetQAAgent,
     "AGENT-27": ExchangeAgent,
+    "AGENT-28": RoiCalculatorAgent,
 }
 
 
