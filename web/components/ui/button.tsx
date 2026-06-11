@@ -8,7 +8,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Praxis primary accent (coral) for primary actions.
+        // AI CoE primary accent (coral) for primary actions.
         default: "bg-indigo-600 text-white hover:bg-indigo-700",
         outline: "border border-neutral-300 bg-transparent hover:bg-neutral-100",
         ghost: "hover:bg-neutral-100",

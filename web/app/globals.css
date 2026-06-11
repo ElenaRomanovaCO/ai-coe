@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 /*
- * Praxis design tokens — extracted from ui-designs/designs/Copilot Dock (offline).html
+ * AI CoE design tokens — extracted from ui-designs/designs/Copilot Dock (offline).html
  * (the only self-contained mock) and promoted here so every page inherits them.
  *
- * NOTE: the real Praxis brand is WARM/CORAL, not the indigo/slate that
+ * NOTE: the real AI CoE brand is WARM/CORAL, not the indigo/slate that
  * design-system.md's prose describes (which it flags as an "adjustable starting
  * point"). To recolor the whole app without editing every file, the Tailwind
  * `indigo-*` scale is remapped to the coral accent, and `slate-*` / `neutral-*`

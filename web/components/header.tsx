@@ -37,10 +37,10 @@ export function Header({ onMenu }: { onMenu?: () => void }) {
           <Menu className="h-5 w-5" />
         </button>
         <Link href="/dashboard" className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded bg-indigo-600 text-xs font-bold text-white">
-            P
+          <span className="flex h-6 w-6 items-center justify-center rounded bg-indigo-600 text-[10px] font-bold text-white">
+            AI
           </span>
-          <span className="text-base font-semibold tracking-tight text-slate-900">Praxis</span>
+          <span className="text-base font-semibold tracking-tight text-slate-900">AI CoE</span>
         </Link>
       </div>
 

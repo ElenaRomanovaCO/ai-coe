@@ -37,7 +37,7 @@ fluff.
   reusable **stage indicator** (e.g. a 6-segment bar or pill) used across assessment,
   dashboard, and asset cards.
 - **Wave numbers (1–7)** tag modules; show as small neutral chips.
-- **Wordmark:** the product is branded **"Praxis"** in the UI (established by the
+- **Wordmark:** the product is branded **"AI CoE"** in the UI (established by the
   generated designs in `designs/`). Use it as the app's name/logo.
 - **Typography:** **Hanken Grotesk** (the generated designs use it; load via Google
   Fonts). Inter/system UI is an acceptable fallback. Strong hierarchy: large semibold
