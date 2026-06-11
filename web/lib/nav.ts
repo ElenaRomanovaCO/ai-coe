@@ -93,7 +93,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { id: "module-4", label: "Governance & Risk", wave: 3, icon: ShieldCheck, route: "/modules/governance", enabled: true, purpose: "Check use cases against AI controls." },
       { id: "module-21", label: "Ethics & Bias Checker", wave: 3, icon: Scale, route: "/modules/ethics-checker", enabled: true, purpose: "Flag ethics & bias risks." },
       { id: "module-25", label: "Compliance Tracker", wave: 3, icon: ClipboardCheck, route: "/modules/compliance-tracker", enabled: true, purpose: "Global AI regulation tracker." },
-      { id: "module-18", label: "Project Health", wave: 5, icon: Activity, enabled: false, purpose: "Monitor AI project health." },
+      { id: "module-18", label: "Project Health", wave: 5, icon: Activity, route: "/modules/project-health", enabled: true, purpose: "Monitor AI project health." },
       { id: "module-22", label: "Benchmark", wave: 5, icon: BarChart3, enabled: false, purpose: "Compare clients to peers." },
     ],
   },
