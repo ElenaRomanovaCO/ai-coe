@@ -28,6 +28,11 @@ except ImportError:  # pragma: no cover - flat layout in the Lambda zip
 EMBED_DIMENSIONS = 1024
 _FRONTMATTER = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
 _ID_LINE = re.compile(r"^id:\s*(.+?)\s*$", re.MULTILINE)
+# Runtime-generated vault artifacts (assessments, governance reviews, ideations, …)
+# carry `generated: true` in frontmatter; we flag their vectors so chat's
+# search_knowledge_base can scope them out of curated KB results. The "generated"
+# key is shared (as a literal) with vault_export.py + search_knowledge_base.py.
+_GENERATED_LINE = re.compile(r"^generated:\s*true\s*$", re.IGNORECASE | re.MULTILINE)
 
 
 def _now_iso() -> str:
@@ -40,6 +45,12 @@ def _frontmatter_id(text: str) -> str | None:
         return None
     m = _ID_LINE.search(fm.group(1))
     return m.group(1).strip().strip("\"'") if m else None
+
+
+def _frontmatter_generated(text: str) -> bool:
+    """True if the file's frontmatter marks it a runtime-generated artifact."""
+    fm = _FRONTMATTER.match(text)
+    return bool(fm and _GENERATED_LINE.search(fm.group(1)))
 
 
 def _content_type(key: str) -> str:
@@ -173,6 +184,9 @@ class ReEmbedder:
         text = body.decode("utf-8")
         fm_id = _frontmatter_id(text)
         ctype = _content_type(key)
+        # True only for runtime-generated artifacts; omitted otherwise so curated
+        # content carries no flag (and the None-filter below keeps metadata small).
+        generated = _frontmatter_generated(text) or None
         updated_at = _now_iso()
         chunks = chunk_markdown(text)
 
@@ -182,6 +196,7 @@ class ReEmbedder:
             metadata = {
                 "file_path": key,
                 "content_type": ctype,
+                "generated": generated,
                 "frontmatter_id": fm_id,
                 "chunk_index": ch.index,
                 "updated_at": updated_at,

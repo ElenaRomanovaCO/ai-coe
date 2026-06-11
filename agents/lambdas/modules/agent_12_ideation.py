@@ -42,6 +42,7 @@ from agents.lib.bedrock_client import BedrockClient
 
 from .agent_03_asset_library import AssetLibraryAgent, _slug
 from .base import ModuleAgent
+from .vault_export import export_frontmatter
 
 AGENT_ID = "AGENT-12"
 IDEATION_PREFIX = "ideation/"
@@ -186,7 +187,7 @@ class IdeationAgent(ModuleAgent):
 
         ideation_id = "idea-" + uuid.uuid4().hex[:12]
         created_at = _now_iso()
-        markdown = self._export_to_markdown(req, candidates, created_at)
+        markdown = self._export_to_markdown(req, candidates, created_at, ideation_id, display_name)
         vault_path = self._write_vault(display_name, created_at, markdown)
 
         result = IdeationResult(
@@ -302,9 +303,29 @@ class IdeationAgent(ModuleAgent):
 
     # --- export (templated markdown) ---------------------------------------
     def _export_to_markdown(
-        self, req: IdeationRequest, candidates: list[UseCaseCandidate], created_at: str
+        self,
+        req: IdeationRequest,
+        candidates: list[UseCaseCandidate],
+        created_at: str,
+        ideation_id: str = "",
+        display_name: str = "",
     ) -> str:
+        # Tag the export as a generated vault artifact so the ReEmbed pipeline marks
+        # its vectors generated:true and chat search scopes them out of curated KB
+        # results (vault/decisions/runtime-vault-writers.md).
+        frontmatter = export_frontmatter(
+            "ideation",
+            {
+                "id": ideation_id,
+                "title": f"Use Case Ideation — {req.industry} · Stage {req.ai_stage}",
+                "display_name": display_name,
+                "industry": req.industry,
+                "ai_stage": req.ai_stage,
+                "created_at": created_at,
+            },
+        )
         lines = [
+            frontmatter,
             f"# AI Use Case Ideation — {req.industry.title()} · Stage {req.ai_stage}",
             "",
             f"_Generated {created_at[:10]} · {len(candidates)} candidates, ranked by "

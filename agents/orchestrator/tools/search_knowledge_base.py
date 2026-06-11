@@ -97,6 +97,7 @@ class KnowledgeBaseSearcher:
         query: str,
         top_k: int = 5,
         content_types: list[str] | None = None,
+        include_generated: bool = False,
     ) -> list[Citation]:
         """Return up to ``top_k`` citations, optionally filtered to content types.
 
@@ -104,11 +105,21 @@ class KnowledgeBaseSearcher:
         a filter is given we over-fetch and filter client-side so the filter never
         starves the result set, which keeps us independent of S3 Vectors filter
         syntax quirks.
+
+        Runtime-*generated* vault artifacts (assessment results, governance reviews,
+        ideations — vectors tagged ``generated: true`` by the ReEmbed pipeline) are
+        excluded by default so curated knowledge isn't crowded out by, or confused
+        with, a user's own generated content. ``include_generated=True`` opts in (the
+        seam for a future per-user "search my artifacts" view; cross-user scoping is a
+        deferred limitation — see ``vault/decisions/runtime-vault-writers.md``).
         """
         wanted: set[str] | None = None
         fetch_k = top_k
         if content_types:
             wanted = {c for c in content_types if c in DIR_FROM_CONTENT_TYPE}
+        # Over-fetch whenever we filter client-side (content-type filter or the
+        # default generated-exclusion) so the filter never starves the result set.
+        if content_types or not include_generated:
             fetch_k = max(top_k * 4, top_k)
 
         resp = self.s3vectors.query_vectors(
@@ -124,6 +135,8 @@ class KnowledgeBaseSearcher:
         citations: list[Citation] = []
         for v in resp.get("vectors", []):
             meta = v.get("metadata", {}) or {}
+            if meta.get("generated") and not include_generated:
+                continue  # scope out runtime-generated artifacts (see docstring)
             dir_prefix = meta.get("content_type", "")
             content_type = CONTENT_TYPE_FROM_DIR.get(dir_prefix)
             if content_type is None:

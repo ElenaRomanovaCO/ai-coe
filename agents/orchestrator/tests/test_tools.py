@@ -95,12 +95,11 @@ class FakeS3Vectors:
         return {"vectors": self._vectors}
 
 
-def _vec(file_path, ctype_dir, idx=0, distance=0.2):
-    return {
-        "key": f"{file_path}#{idx}",
-        "distance": distance,
-        "metadata": {"file_path": file_path, "content_type": ctype_dir, "chunk_index": idx},
-    }
+def _vec(file_path, ctype_dir, idx=0, distance=0.2, generated=False):
+    meta = {"file_path": file_path, "content_type": ctype_dir, "chunk_index": idx}
+    if generated:
+        meta["generated"] = True
+    return {"key": f"{file_path}#{idx}", "distance": distance, "metadata": meta}
 
 
 def test_search_maps_dir_to_singular_and_scores():
@@ -123,6 +122,35 @@ def test_search_content_type_filter():
     )
     cites = searcher.search("anything", top_k=5, content_types=["tool"])
     assert [c.content_type for c in cites] == ["tool"]
+
+
+def test_search_excludes_generated_by_default():
+    cache = make_cache()
+    # A curated assessment sample surfaces; a runtime-generated one in the same folder
+    # (content_type "assessments") is scoped out.
+    s3v = FakeS3Vectors(
+        [
+            _vec("assets/a.md", "assets"),
+            _vec("assessments/demo-user/sample.md", "assessments"),
+            _vec("assessments/dana/run.md", "assessments", idx=1, generated=True),
+        ]
+    )
+    searcher = KnowledgeBaseSearcher(
+        registry_provider=cache, bedrock=FakeBedrockEmbed(), s3vectors=s3v
+    )
+    paths = [c.file_path for c in searcher.search("anything", top_k=5)]
+    assert "assessments/demo-user/sample.md" in paths  # curated stays
+    assert "assessments/dana/run.md" not in paths  # generated scoped out
+
+
+def test_search_include_generated_opt_in():
+    cache = make_cache()
+    s3v = FakeS3Vectors([_vec("assessments/dana/run.md", "assessments", generated=True)])
+    searcher = KnowledgeBaseSearcher(
+        registry_provider=cache, bedrock=FakeBedrockEmbed(), s3vectors=s3v
+    )
+    cites = searcher.search("anything", top_k=5, include_generated=True)
+    assert [c.file_path for c in cites] == ["assessments/dana/run.md"]
 
 
 def test_search_respects_top_k():

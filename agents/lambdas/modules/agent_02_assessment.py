@@ -29,6 +29,7 @@ from botocore.exceptions import ClientError
 from agents.lib import models as lib_models
 
 from .base import ModuleAgent
+from .vault_export import export_frontmatter
 from .worker_client import WorkerInvoker
 
 AGENT_ID = "AGENT-02"
@@ -239,21 +240,28 @@ class AssessmentAgent(ModuleAgent):
     def _write_assessment_file(self, state: dict, score: dict, recommendations: list[dict]) -> str:
         ts_key = state["created_at"].replace(":", "-")
         key = f"assessments/{_slug(state['display_name'])}/{ts_key}.md"
-        scores_yaml = "\n".join(f"  {d}: {s}" for d, s in score["dimension_scores"].items())
         recs_md = "\n".join(
             f"- {r.get('title', r.get('id'))} (`{r.get('file_path')}`)" for r in recommendations
         ) or "- (none)"
+        # Tag as a generated vault artifact so the ReEmbed pipeline marks its vectors
+        # generated:true and chat search scopes them out of curated KB results — the
+        # seeded demo assessment shares this folder but carries no flag, so it still
+        # surfaces (vault/decisions/runtime-vault-writers.md).
+        frontmatter = export_frontmatter(
+            "assessment",
+            {
+                "id": state["assessment_id"],
+                "title": f"AI Maturity Assessment — Stage {score['stage']}",
+                "display_name": state["display_name"],
+                "client_context": state.get("client_context") or "",
+                "industry": state.get("industry") or "",
+                "stage": score["stage"],
+                "dimension_scores": score["dimension_scores"],
+                "created_at": state["created_at"],
+            },
+        )
         body = (
-            f"---\n"
-            f"id: {state['assessment_id']}\n"
-            f"type: assessment\n"
-            f"display_name: {state['display_name']}\n"
-            f"client_context: {state.get('client_context') or ''}\n"
-            f"industry: {state.get('industry') or ''}\n"
-            f"stage: {score['stage']}\n"
-            f"dimension_scores:\n{scores_yaml}\n"
-            f"created_at: {state['created_at']}\n"
-            f"---\n\n"
+            f"{frontmatter}\n"
             f"# AI Maturity Assessment — Stage {score['stage']} of 5\n\n"
             f"{score['rationale']}\n\n"
             f"## Recommended next steps\n\n{recs_md}\n"

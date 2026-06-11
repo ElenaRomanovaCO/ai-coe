@@ -110,6 +110,10 @@ Tools: generate_candidates, score_candidates (effort/impact scoring with histori
 
 ## C. Notes & Decisions Log
 
+- 2026-06-11: Tag and scope runtime-generated vault artifacts — runtime vault exports
+  (assessment/governance/ideation + future writers) carry `content_type` + `generated:
+  true`; ReEmbed flags the vectors and chat search excludes them by default, since
+  curated and generated content share folders. See `vault/decisions/runtime-vault-writers.md`.
 - **2026-06-11: `generate_candidates` is an LLM call; everything around it is
   deterministic.** Candidate generation is inherently generative, so AGENT-12 calls
   Sonnet (returns a JSON array, parsed leniently — strips code fences, slices the

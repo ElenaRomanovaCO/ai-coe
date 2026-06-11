@@ -135,6 +135,8 @@ def test_context_is_woven_into_prompt():
 def test_export_markdown_has_context_and_candidates():
     out = _agent().handle(dict(REQ))
     md = out["markdown"]
+    # Tagged as a generated vault artifact (scoped out of curated chat KB search).
+    assert md.startswith("---\ncontent_type: ideation\ngenerated: true\n")
     assert "# AI Use Case Ideation" in md
     assert "Customer churn predictor" in md
     assert "Available data" in md

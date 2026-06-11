@@ -73,9 +73,11 @@ def test_full_run_strong_eight_turns_and_result():
     assert len(result["dimension_scores"]) == 6
     assert result["recommendations"]  # WORKER-03 returned items
     assert result["vault_file_path"].startswith("assessments/alex/")
-    # Result markdown was written to the vault bucket with assessment frontmatter.
+    # Result markdown was written to the vault bucket, tagged as a generated artifact
+    # so chat search scopes it out of curated KB results.
     md = s3.objects[result["vault_file_path"]]
-    assert "type: assessment" in md
+    assert "content_type: assessment" in md
+    assert "generated: true" in md
     assert f"stage: {result['stage']}" in md
 
 

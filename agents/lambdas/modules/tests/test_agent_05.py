@@ -97,7 +97,8 @@ def test_check_runs_pipeline_and_writes_vault():
     # Review markdown written to the vault under reviews/governance/<slug>/.
     assert out["vault_file_path"].startswith("reviews/governance/dana/")
     md = s3.objects[out["vault_file_path"]]
-    assert "type: governance-review" in md
+    assert "content_type: governance-review" in md
+    assert "generated: true" in md
     assert "Business Associate Agreement" in md  # a HIPAA checklist item rendered
 
 

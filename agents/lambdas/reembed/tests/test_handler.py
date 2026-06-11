@@ -108,6 +108,24 @@ def test_embeds_new_markdown():
     assert vectors.put[0]["metadata"]["file_path"] == key
 
 
+def test_generated_artifact_flagged_in_metadata():
+    key = "ideation/dana/2026-06-11T00-00-00Z.md"
+    body = b"---\ncontent_type: ideation\ngenerated: true\nid: idea-1\n---\n\n# Ideas\n\nbody\n"
+    vectors = FakeS3Vectors()
+    emb = _embedder(FakeS3({("v", key): body}), FakeBedrock(), vectors)
+    emb.process_event(_created("v", key))
+    assert vectors.put[0]["metadata"]["generated"] is True
+
+
+def test_curated_content_has_no_generated_flag():
+    key = "assets/x.md"
+    body = b"---\nid: a\ntitle: T\n---\n\n# Curated\n\nbody\n"
+    vectors = FakeS3Vectors()
+    emb = _embedder(FakeS3({("v", key): body}), FakeBedrock(), vectors)
+    emb.process_event(_created("v", key))
+    assert "generated" not in vectors.put[0]["metadata"]
+
+
 def test_unchanged_hash_skips_embedding():
     key = "vault/x.md"
     body = b"# H\n\nsame content\n"

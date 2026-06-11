@@ -39,6 +39,7 @@ from agents.lib.base_agent import instrumented
 from agents.lib.bedrock_client import BedrockClient
 
 from .base import ModuleAgent
+from .vault_export import export_frontmatter
 from .worker_client import WorkerInvoker
 
 AGENT_ID = "AGENT-05"
@@ -242,18 +243,24 @@ class GovernanceAgent(ModuleAgent):
             return line
 
         chk_md = "\n".join(_chk_line(c) for c in checklist) or "- (none)"
-        dt_csv = ", ".join(context.get("data_types") or [])
+        # Tag as a generated vault artifact so the ReEmbed pipeline marks its vectors
+        # generated:true and chat search scopes them out of curated KB results
+        # (vault/decisions/runtime-vault-writers.md).
+        frontmatter = export_frontmatter(
+            "governance-review",
+            {
+                "id": review_id,
+                "title": "Governance & Risk Review",
+                "display_name": display_name,
+                "industry": context.get("industry") or "",
+                "geography": context.get("geography") or "",
+                "data_types": context.get("data_types") or [],
+                "ai_use_case_type": context.get("ai_use_case_type") or "",
+                "created_at": created_at,
+            },
+        )
         body = (
-            f"---\n"
-            f"id: {review_id}\n"
-            f"type: governance-review\n"
-            f"display_name: {display_name}\n"
-            f"industry: {context.get('industry') or ''}\n"
-            f"geography: {context.get('geography') or ''}\n"
-            f"data_types: [{dt_csv}]\n"
-            f"ai_use_case_type: {context.get('ai_use_case_type') or ''}\n"
-            f"created_at: {created_at}\n"
-            f"---\n\n"
+            f"{frontmatter}\n"
             f"# Governance & Risk Review\n\n"
             f"{summary}\n\n"
             f"## Regulations considered\n\n{reg_md}\n\n"
