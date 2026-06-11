@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01 (seeded feed items), 02, 07 (Universal Asset Q&A pattern)
 > **Blocks:** none
 > **Estimated effort:** 2-3 days solo
-> **Status:** ☐ Not started
+> **Status:** ☑ Built + verified locally (2026-06-10)
 
 ---
 
@@ -114,6 +114,34 @@ Tools: list_feed_items, get_feed_item (lazily invokes WORKER-11 if commentary ab
 ---
 
 ## C. Notes & Decisions Log
+
+- **2026-06-10: WORKER-11 makes its own Bedrock call.** The spec scopes commentary
+  generation to WORKER-11 and the workers Lambda role already grants
+  `bedrock:InvokeModel` (`infra/stacks/iam.py`), so WORKER-11 is the first LLM-backed
+  worker (Sonnet 4.6). It degrades to a deterministic note (the item's own "What this
+  means" section, or its lede) when Bedrock errors, so the detail page always renders
+  and tests run offline. AGENT-23 stays mechanical (list/get/radar) per the AGENT-24
+  precedent and invokes WORKER-11 lazily on `get`.
+- **2026-06-10: Personalization via UI selectors, not a stored profile.** The app has
+  no persistent user profile (kit-builder / ethics / governance all use local industry
+  + stage selectors). The feed follows suit: the browse page's "Personalize" selectors
+  pass `user_profile.industries` + `ai_stage` to `list`, which re-ranks server-side via
+  WORKER-10 (relevance = industry overlap + tech-focus tag overlap + radar weight; no
+  recency in the worker — AGENT-23 applies the date tie-break across the batch). The
+  active profile is carried to the detail page via query params and re-tailorable there.
+- **2026-06-10: Chat-with-item reuses `AssetChatPanelHook` (AGENT-25).** That component
+  is explicitly documented for Intelligence Feed reuse; it grounds a scoped Q&A in the
+  item body, satisfying FR-043 without AGENT-23 needing its own chat loop.
+- **2026-06-10: modules.json `model_tier` set to `sonnet-4-6`** (was `haiku-4-5`) to
+  match the AGENT-23 spec, plus `enabled: true` and `ui_route: /modules/intelligence-feed`
+  (mirroring the compliance-tracker entry). Nav entry enabled + routed in `web/lib/nav.ts`.
+
+**Verification (local):** `pytest agents/` 298 passed; `ruff check agents/` clean;
+web `tsc --noEmit` clean, `eslint` clean, `next build` succeeds with all three
+`/modules/intelligence-feed*` routes present (dynamic). Personalization, lazy
+commentary + fallback, and radar grouping are covered by `test_agent_23.py`,
+`test_worker_10.py`, and `test_worker_11.py`.
+
 ## D. References
 - Brief: FRs 042-044, AGENT-23, WORKER-10/11
 - Foundation: `ai_docs/tasks/00_foundation.md`
