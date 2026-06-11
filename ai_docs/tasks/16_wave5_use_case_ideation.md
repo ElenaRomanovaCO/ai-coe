@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01, 02
 > **Blocks:** none
 > **Estimated effort:** 2 days solo
-> **Status:** ☐ Not started
+> **Status:** ☑ Built + verified locally (2026-06-11); commit/deploy pending review
 
 ---
 
@@ -105,6 +105,35 @@ Tools: generate_candidates, score_candidates (effort/impact scoring with histori
 ---
 
 ## C. Notes & Decisions Log
+
+- **2026-06-11: `generate_candidates` is an LLM call; everything around it is
+  deterministic.** Candidate generation is inherently generative, so AGENT-12 calls
+  Sonnet (returns a JSON array, parsed leniently — strips code fences, slices the
+  outermost `[...]`, also accepts a `{"candidates": [...]}` wrapper — and validated per
+  item against `UseCaseCandidate`). This is the same "generation is the whole job"
+  carve-out documented for WORKER-11 in `vault/decisions/worker-pattern.md`. The
+  remaining "tools" stay deterministic and unit-tested: **score_candidates** =
+  `2·impact − effort` plus priors (+1 when the client's available data supports the
+  idea, −1 for a high-effort idea at stage ≤1), sorted desc; **reference linking**
+  composes AGENT-03 semantic search (best-effort, one search per candidate);
+  **export_to_markdown** is templated. Unparseable model output returns a graceful
+  `status: error` (no fake fallback — generation can't be faked).
+- **2026-06-11: Persistence mirrors AGENT-02/05.** Full result JSON → sessions bucket
+  (`ideation/{display_name}/{id}.json`, read back by `get` for the results page);
+  human-readable export → vault (`ideation/{display_name}/{ts}.md`, re-embedded,
+  searchable) and returned as `vault_file_path`. The UI "Export markdown" button
+  downloads that same markdown client-side (blob), so no presigned URL is needed.
+- **2026-06-11: No workers, no IAM change.** AGENT-12 owns its single LLM call; the
+  module-agents role already grants `bedrock:InvokeModel` + `s3:PutObject` (vault &
+  sessions) + `s3vectors:QueryVectors` (AGENT-03 search). `display_name` comes from the
+  form (localStorage), as in kit-builder. modules.json: module-12 `enabled` +
+  `ui_route: /modules/ideation`; nav enabled + routed.
+
+**Verification (local):** `pytest agents/` 313 passed; `ruff check agents/` clean; web
+`tsc --noEmit` clean, `eslint` clean, `next build` succeeds with `/modules/ideation`
+and `/modules/ideation/[id]` present. Generate→rank→reference→persist→get round-trip,
+markdown export, and LLM-JSON parse (incl. fenced + wrapped) covered by `test_agent_12.py`.
+
 ## D. References
 - Brief: FRs 045-047, AGENT-12
 - Foundation: `ai_docs/tasks/00_foundation.md`
