@@ -20,6 +20,7 @@ import {
   type LucideIcon,
   MessagesSquare,
   Package,
+  Puzzle,
   Rss,
   Scale,
   ShieldCheck,
@@ -110,6 +111,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       { id: "module-11", label: "Prompt Studio", wave: 4, icon: Sparkles, route: "/modules/prompt-studio", enabled: true, purpose: "Build & test prompts." },
       { id: "module-12", label: "Use Case Ideation", wave: 5, icon: Lightbulb, route: "/modules/ideation", enabled: true, purpose: "Generate & rank AI use cases." },
+      { id: "module-28", label: "Skills & Plugin Exchange", wave: 5, icon: Puzzle, route: "/modules/exchange", enabled: true, purpose: "Reusable agentic-dev skills, MCP servers & configs." },
       { id: "module-27", label: "Code Accelerator", wave: 7, icon: Code2, enabled: false, purpose: "Claude Code delivery accelerator." },
       { id: "module-14", label: "Client Report", wave: 6, icon: FileText, enabled: false, purpose: "Client-facing maturity report." },
       // Internal CoE tool: visible in the (password-gated) app sidebar so the team can log

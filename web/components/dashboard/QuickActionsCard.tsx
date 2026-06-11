@@ -39,6 +39,12 @@ export function QuickActionsCard() {
         >
           Ethics Review
         </Link>
+        <Link
+          href="/modules/exchange"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          Skills Exchange
+        </Link>
       </CardContent>
     </Card>
   );
