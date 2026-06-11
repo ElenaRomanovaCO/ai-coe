@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FileText, MessageSquarePlus, Sparkles } from "lucide-react";
@@ -13,7 +13,7 @@ import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getDisplayName } from "@/lib/auth";
-import { CONFIDENCE_STYLE, type AnswerResult } from "@/lib/qa";
+import { CONFIDENCE_STYLE, SUGGESTED_QUESTIONS, type AnswerResult } from "@/lib/qa";
 import { cn } from "@/lib/utils";
 
 // AI mode: ask a natural-language question, get a synthesized answer with citations
@@ -26,11 +26,26 @@ export function AiAsk() {
     () => null,
   );
 
+  const inputRef = useRef<HTMLInputElement>(null);
   const [question, setQuestion] = useState("");
   const [asking, setAsking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnswerResult | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Fill the box from a starter question and select the [bracket] so the user can
+  // type their topic right over it.
+  function pickSuggestion(q: string) {
+    setQuestion(q);
+    const m = q.match(/\[[^\]]*\]/);
+    requestAnimationFrame(() => {
+      const el = inputRef.current;
+      if (!el) return;
+      el.focus();
+      if (m && m.index != null) el.setSelectionRange(m.index, m.index + m[0].length);
+      else el.setSelectionRange(q.length, q.length);
+    });
+  }
 
   async function onAsk() {
     if (!question.trim() || asking) return;
@@ -75,6 +90,7 @@ export function AiAsk() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-2">
         <Input
+          ref={inputRef}
           placeholder="Ask anything about the Knowledge Base…"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
@@ -86,6 +102,26 @@ export function AiAsk() {
           {asking ? "Thinking…" : "Ask"}
         </Button>
       </div>
+
+      {!result && !asking && (
+        <div>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-400">
+            Try one of these
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {SUGGESTED_QUESTIONS.map((q) => (
+              <button
+                key={q}
+                type="button"
+                onClick={() => pickSuggestion(q)}
+                className="rounded-full border border-neutral-300 px-3 py-1 text-sm text-neutral-600 transition-colors hover:border-indigo-400 hover:text-indigo-700"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

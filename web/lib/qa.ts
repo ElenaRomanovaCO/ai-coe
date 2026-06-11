@@ -57,6 +57,16 @@ export interface AnswerResult {
   message?: string;
 }
 
+// Starter questions for AI mode — clicking one fills the box (the [bracket] is
+// auto-selected so the user can type their topic straight over it).
+export const SUGGESTED_QUESTIONS: string[] = [
+  "How can I use AI for [your use case]?",
+  "What can AI do to help me with [a task]?",
+  "What are the risks of using AI for [a use case]?",
+  "Which tools fit [your scenario]?",
+  "What regulations apply to AI in [your industry]?",
+];
+
 export const SORT_OPTIONS: { value: string; label: string }[] = [
   { value: "recent", label: "Most recent" },
   { value: "upvotes", label: "Most upvoted" },
