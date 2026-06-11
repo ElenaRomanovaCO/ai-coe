@@ -109,7 +109,7 @@ export const NAV_GROUPS: NavGroup[] = [
         purpose: "Assemble a tailored engagement kit.",
       },
       { id: "module-11", label: "Prompt Studio", wave: 4, icon: Sparkles, route: "/modules/prompt-studio", enabled: true, purpose: "Build & test prompts." },
-      { id: "module-12", label: "Use Case Ideation", wave: 5, icon: Lightbulb, enabled: false, purpose: "Generate & rank AI use cases." },
+      { id: "module-12", label: "Use Case Ideation", wave: 5, icon: Lightbulb, route: "/modules/ideation", enabled: true, purpose: "Generate & rank AI use cases." },
       { id: "module-27", label: "Code Accelerator", wave: 7, icon: Code2, enabled: false, purpose: "Claude Code delivery accelerator." },
       { id: "module-14", label: "Client Report", wave: 6, icon: FileText, enabled: false, purpose: "Client-facing maturity report." },
       { id: "module-19", label: "Decision Log", wave: 5, icon: BookMarked, enabled: false, purpose: "Capture engagement decisions." },
