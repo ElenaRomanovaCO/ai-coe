@@ -7,7 +7,12 @@
 > **Depends on:** 00, 01, 04 (dashboard surfaces it)
 > **Blocks:** none
 > **Estimated effort:** ~1 day solo
-> **Status:** ☑ Built + verified locally (2026-06-11); commit/deploy pending review
+> **Status:** ☑ DONE — deployed + live-verified (2026-06-11). AGENT-28 deployed (image-only
+> diff, no IAM change); module-29 synced to S3. Live smoke: calculate (build $100k, run $20k/yr,
+> 2000h @ $80, 3yr) → total $160k, value $160k/yr, net $320k, **ROI 200%, payback 8.6 months**,
+> Sonnet business-case narrative grounded in the figures. Amplify #43 SUCCEED on `6b64aa6`;
+> roi-calculator + [id] serve; dashboard Quick Action live. (nav.ts/modules.json git-commit
+> deferred — they carry the 16d/16e + nav-reorg WIP.)
 
 ---
 
