@@ -55,14 +55,22 @@ export default async function EngagementDetailPage({
             </div>
           )}
         </div>
-        <span
-          className={cn(
-            "rounded border px-3 py-1 text-sm font-medium",
-            BAND_STYLE[e.band],
-          )}
-        >
-          {bandLabel(e.band)} · risk {e.risk_score}/100
-        </span>
+        <div className="flex flex-col items-end gap-2">
+          <span
+            className={cn(
+              "rounded border px-3 py-1 text-sm font-medium",
+              BAND_STYLE[e.band],
+            )}
+          >
+            {bandLabel(e.band)} · risk {e.risk_score}/100
+          </span>
+          <Link
+            href={`/modules/retros/new/${e.engagement_id}`}
+            className="text-xs font-medium text-indigo-600 hover:underline"
+          >
+            File retrospective →
+          </Link>
+        </div>
       </header>
 
       <div className="flex flex-col gap-8 lg:flex-row">
