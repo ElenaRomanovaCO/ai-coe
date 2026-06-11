@@ -7,7 +7,11 @@
 > **Depends on:** 00, 01 (seeded feed items), 02, 07 (Universal Asset Q&A pattern)
 > **Blocks:** none
 > **Estimated effort:** 2-3 days solo
-> **Status:** ☑ Built + verified locally (2026-06-10)
+> **Status:** ☑ DONE — deployed + live-verified (2026-06-11). Backend: AiCoE-Agents
+> redeployed (3 Lambdas, image-only diff, no IAM change); live `get` smoke returned a
+> real Sonnet WORKER-11 note (`tailored: true`) — confirms the workers-role cross-region
+> Bedrock grant holds. Frontend: Amplify build #31 SUCCEED on `94cebbb`; feed + radar
+> routes serve (gated 307 → /login).
 
 ---
 
