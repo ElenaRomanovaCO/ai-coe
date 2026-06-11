@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01, 02, 18 (engagements)
 > **Blocks:** none
 > **Estimated effort:** 1-2 days solo
-> **Status:** ☐ Not started
+> **Status:** ☑ Built + verified locally (2026-06-11); commit/deploy pending review
 
 ---
 
@@ -100,6 +100,32 @@ Tools: write_retro, invoke_worker (none defined; uses Sonnet directly for extrac
 ---
 
 ## C. Notes & Decisions Log
+
+- **2026-06-11: Two-tier storage by audience — the key design call.** The **retro**
+  (`retros/{display_name}/{retro_id}.md`) is engagement-specific, so it's tagged
+  `generated: true` via `export_frontmatter` and scoped out of curated chat KB search
+  (runtime-vault-writers convention). The **insights** (`insights/{insight_id}.md`) are
+  the whole point — reusable, generic knowledge — so they're written WITHOUT the
+  generated flag, and the orchestrator's `CONTENT_TYPE_FROM_DIR` now maps the
+  `insights/` folder → new `insight` content type, making them **retrievable by chat**
+  `search_knowledge_base` (FR-055). The folder + flag cleanly separate the two even
+  though both are runtime-written. (Web `Citation.content_type` is loosely typed
+  `string`, so adding the `insight` literal is a no-ripple orchestrator-only change.)
+- **2026-06-11: `extract_insights` is the one LLM call.** Sonnet returns 2-4 generic
+  insights (type/statement/evidence/asset_id), parsed leniently; `link_back_to_assets`
+  only links an `asset_id` that's actually in the retro's `patterns_used` (drops
+  hallucinated links). Deterministic fallback derives insights from
+  what_worked/what_failed/tools when Bedrock errors. Structured state in sessions JSON
+  (read back by get/list), mirroring AGENT-02. No workers, no IAM change.
+- **2026-06-11: Entry point** — retros are filed from an engagement: the Project Health
+  `[id]` page gained a "File retrospective →" link to `/modules/retros/new/{engagement_id}`.
+
+**Verification (local):** `pytest agents/` 367 passed; `ruff` clean; `validate_vault.py`
+OK (74 files); web `tsc`/`eslint` clean, `next build` succeeds with `/modules/retros`,
+`/new/[engagement_id]`, `/[id]`. write_retro (retro generated-flagged + insights
+searchable/not-generated + asset-link validation), extraction fallback, get/list, and
+the orchestrator insights mapping covered by `test_agent_15.py`.
+
 ## D. References
 - Brief: FRs 054-055, AGENT-15
 - Foundation: `ai_docs/tasks/00_foundation.md`

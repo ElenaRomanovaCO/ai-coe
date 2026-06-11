@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 # vector index records that prefix as ``content_type``. ``search_knowledge_base``
 # maps one to the other via CONTENT_TYPE_FROM_DIR below.
 ContentType = Literal[
-    "asset", "tool", "vendor", "reg", "feed", "prompt", "decision", "assessment", "kit"
+    "asset", "tool", "vendor", "reg", "feed", "prompt", "decision", "assessment", "kit", "insight"
 ]
 
 CONTENT_TYPE_FROM_DIR: dict[str, ContentType] = {
@@ -30,6 +30,9 @@ CONTENT_TYPE_FROM_DIR: dict[str, ContentType] = {
     "decisions": "decision",
     "assessments": "assessment",
     "kits": "kit",
+    # Retro-extracted insights (AGENT-15) are reusable knowledge — searchable in chat.
+    # (The retros themselves live under retros/ and are generated:true → scoped out.)
+    "insights": "insight",
 }
 DIR_FROM_CONTENT_TYPE: dict[ContentType, str] = {v: k for k, v in CONTENT_TYPE_FROM_DIR.items()}
 
