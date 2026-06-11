@@ -7,7 +7,12 @@
 > **Depends on:** 00, 01, 02
 > **Blocks:** none (but unlocks Active Engagements card on Personal Dashboard)
 > **Estimated effort:** 2-3 days solo
-> **Status:** ☑ Built + verified locally (2026-06-11); commit/deploy pending review
+> **Status:** ☑ DONE — deployed + live-verified (2026-06-11). Backend AGENT-17 deployed
+> (image-only diff, no IAM change). Live smoke: register → post scope-change update →
+> Sonnet returned **risk 78 / red** with **3 grounded flags** (refs resolved to real curated
+> assets: kickoff-template, roi-template) → list_portfolio shows the banded engagement.
+> FRs 051-053 verified. Amplify build #39 SUCCEED on `2d2cca1`; portfolio/new/[id] serve;
+> dashboard Active Engagements card now reads live `list_portfolio`.
 
 ---
 
