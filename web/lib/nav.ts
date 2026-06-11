@@ -112,7 +112,10 @@ export const NAV_GROUPS: NavGroup[] = [
       { id: "module-12", label: "Use Case Ideation", wave: 5, icon: Lightbulb, route: "/modules/ideation", enabled: true, purpose: "Generate & rank AI use cases." },
       { id: "module-27", label: "Code Accelerator", wave: 7, icon: Code2, enabled: false, purpose: "Claude Code delivery accelerator." },
       { id: "module-14", label: "Client Report", wave: 6, icon: FileText, enabled: false, purpose: "Client-facing maturity report." },
-      { id: "module-19", label: "Decision Log", wave: 5, icon: BookMarked, enabled: false, purpose: "Capture engagement decisions." },
+      // Internal CoE tool: visible in the (password-gated) app sidebar so the team can log
+      // decisions, but kept out of the chat assistant's live module set (modules.json
+      // enabled:false) so it isn't surfaced as a client-facing capability.
+      { id: "module-19", label: "Decision Log", wave: 5, icon: BookMarked, route: "/modules/decisions", enabled: true, purpose: "Internal decision log — log important CoE decisions." },
     ],
   },
   {
