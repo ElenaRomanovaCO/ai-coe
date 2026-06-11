@@ -7,7 +7,11 @@
 > **Depends on:** 00, 01, 03 (mirrors the Asset Library agent), 07 (reuses the AssetChatPanelHook)
 > **Blocks:** none
 > **Estimated effort:** ~1 day solo (catalog mirrors Asset Library)
-> **Status:** ☑ Built + verified locally (2026-06-11); commit/deploy pending review
+> **Status:** ☑ DONE — deployed + live-verified (2026-06-11). Backend AGENT-27 deployed
+> (image-only diff, no IAM change); 12 seed entries + modules.json synced to S3 (re-embedded
+> as `content_type: exchange`). Live smoke: `list` (tool+category filter) and `search`
+> ("security review" → security-review skill ranks #1) both pass. Amplify build #37 SUCCEED
+> on `3a419d2`; `/modules/exchange` + `/[id]` serve (gated 307).
 
 ---
 

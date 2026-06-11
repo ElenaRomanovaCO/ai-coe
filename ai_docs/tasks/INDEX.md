@@ -123,6 +123,7 @@ Demo outcome: feed + ideation + decisions + project health + retros + benchmarks
 |---|---|---|---|---|---|---|
 | 15 | [15_wave5_intelligence_feed.md](./15_wave5_intelligence_feed.md) | Module 24 | 042, 043, 044 | AGENT-23, WORKER-10/11 | 00-14 | ☑ |
 | 16 | [16_wave5_use_case_ideation.md](./16_wave5_use_case_ideation.md) | Module 12 | 045, 046, 047 | AGENT-12 | 00-15 | ☑ |
+| **16b** | [16b_wave5_agentic_skills_plugin_exchange.md](./16b_wave5_agentic_skills_plugin_exchange.md) | **Module 28** | 078, 079, 080 | AGENT-27 | 00-16 | ☑ |
 | 17 | [17_wave5_decision_log.md](./17_wave5_decision_log.md) | Module 19 | 048, 049, 050 | AGENT-18 | 00-16 | ☐ |
 | 18 | [18_wave5_project_health.md](./18_wave5_project_health.md) | Module 18 | 051, 052, 053 | AGENT-17 | 00-17 | ☐ |
 | 19 | [19_wave5_retrospective.md](./19_wave5_retrospective.md) | Module 16 | 054, 055 | AGENT-15 | 00-18 | ☐ |
