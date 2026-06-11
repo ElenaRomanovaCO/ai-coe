@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01, 02
 > **Blocks:** none (but unlocks Active Engagements card on Personal Dashboard)
 > **Estimated effort:** 2-3 days solo
-> **Status:** ☐ Not started
+> **Status:** ☑ Built + verified locally (2026-06-11); commit/deploy pending review
 
 ---
 
@@ -111,6 +111,34 @@ Tools: register_engagement, post_update, analyze_update (vector search against p
 ---
 
 ## C. Notes & Decisions Log
+
+- **2026-06-11: State model mirrors AGENT-02.** The structured source of truth is a
+  per-engagement JSON in the **sessions** bucket (`engagements/{name}/{eid}.json`,
+  read back by `get`/`list_portfolio`); human-readable markdown mirrors
+  (`meta.md`, `updates/{ts}.md`, `health.md`) are written to the **vault** and tagged
+  `generated: true` via the shared `export_frontmatter` helper — another consumer of the
+  runtime-vault-writers convention, so engagement data (client-specific) is flagged out
+  of curated chat KB search. (No `engagements` schema needed in `validate_vault`: these
+  files are runtime-written, never committed.)
+- **2026-06-11: `analyze_update` is the one LLM step, vector-grounded.** It embeds the
+  update (Titan), vector-searches the **curated** assets (`content_type == "assets"`)
+  for best-practice references — deliberately *not* other engagement updates (those are
+  generated-flagged) — then asks Sonnet for flags (severity/description/remediation/refs)
+  + a 0-100 risk score grounded in those references. Deterministic heuristic fallback
+  keyed on `update_type` (blocker 70 / scope-change 55 / …) when Bedrock errors. Risk →
+  band: green <34, amber 34-66, red ≥67; portfolio risk = latest update's score.
+- **2026-06-11: Dashboard card now live.** `ActiveEngagementsCard` is a client component
+  reading `list_portfolio` for the current display name (riskiest first), replacing the
+  Wave-1 placeholder. Portfolio + register pages are client (need display_name from
+  localStorage); the `[id]` detail is a server component (find-by-id needs no name) with
+  a client `PostUpdateForm` that `router.refresh()`es after analysis. No workers, no IAM
+  change.
+
+**Verification (local):** `pytest agents/` 357 passed; `ruff` clean; `validate_vault.py`
+OK (74 files); web `tsc`/`eslint` clean, `next build` succeeds with `/modules/project-health`,
+`/new`, `/[id]`. register, post_update (analysis + flag persistence + band shift),
+fallback, get timeline, and list_portfolio sorting covered by `test_agent_17.py`.
+
 ## D. References
 - Brief: FRs 051-053, AGENT-17
 - Foundation: `ai_docs/tasks/00_foundation.md`
