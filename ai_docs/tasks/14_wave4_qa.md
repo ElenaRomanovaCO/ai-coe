@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01, 02
 > **Blocks:** none
 > **Estimated effort:** 2 days solo
-> **Status:** ☐ Not started
+> **Status:** ☑ Done — deployed + live-verified (backend + UI smoke) 2026-06-10
 
 ---
 
@@ -101,6 +101,41 @@ Tools: list_threads, get_thread, post_thread (writes a new thread .md), answer_w
 ---
 
 ## C. Notes & Decisions Log
+
+- **2026-06-10 — Deployed + backend-smoked live; user UI smoke pending.** Commits pushed
+  (`2655300..7b280ee`). `cdk deploy AiCoE-Agents` (ModuleAgents +AGENT-09; AiCoE-Iam untouched)
+  → synced modules.json + `vault/qa/` seeds → backend smoke → pushed. Live AGENT-09: list → 3
+  seed threads; answer_with_citations "EU AI Act risk tier for healthcare imaging?" →
+  confidence high, real Sonnet answer ("High-Risk"), cites reg-eu-ai-act + FDA + governance
+  reviews; post_thread → wrote new thread; answer_thread → count 1; upvote → 1/voted. (Smoke
+  left a benign "How should we chunk long PDFs for RAG?" thread live.)
+- **2026-06-10 — DONE ☑.** Amplify build green; user smoked the live Q&A (browse → upvote +
+  answer; Ask AI → cited answer + confidence → save-as-thread). Also added starter-question
+  chips to both the Ask AI page and the browse landing (commits 7895e14 + 065b0c0, frontend-only)
+  on user request. Status + INDEX flipped ☑. FRs 039-041 verified live. **Wave 4 complete
+  (8, 11, 12, 13 all LIVE); all 14 tasks done.**
+- **New `qa` content type:** `QaThreadFrontmatter`/`QaAnswer` schema added to
+  `agents/lib/schemas` + `qa` folder map; **3 seed threads** under `vault/qa/2026-05/`
+  (decided w/ user). Threads write to vault → re-embedded → citable in AI mode.
+- **AGENT-09** (Sonnet): community = `list_threads` (sort recent/upvotes/unanswered) /
+  `get_thread` / `post_thread` + `answer_thread` (write `vault/qa/{yyyy-mm}/{id}.md` via
+  `yaml.safe_dump` + rendered body) / `upvote` (answer-level, idempotent — one per user per
+  answer via vault `qa/_metadata/{id}.json` sidecar + sessions `qa-votes/{slug}.json`). AI =
+  `answer_with_citations` (Titan→S3 Vectors RAG over ALL content types + ONE Sonnet synth;
+  citations deep-link by content type via `_ROUTE_BY_TYPE`; deterministic confidence
+  high/medium/low; related `qa` threads; deterministic fallback to top sources).
+- **Non-streaming** AI answer (established precedent; reframes DoD "streams"). **No new IAM**
+  (module role already has vault Get/List/Put, sessions Put, s3vectors Query/Get, Titan +
+  Sonnet — AGENT-05/02 already write to vault).
+- **Web:** `/modules/qa` browse (QaBrowser: search/sort/tag + inline compose + Ask-AI link) +
+  `[id]` thread (AnswerList: idempotent upvotes + answer-this) + `/ask` AI mode (AiAsk:
+  answer + citation deep-links + confidence + related threads + Save-as-community-thread).
+  React-19-safe.
+- **Verified local:** ruff clean, 275 pytest (+14), vault valid (61 files), `cdk synth`
+  exit 0, web `pnpm lint` + `build` clean (3 qa routes).
+- **Remaining:** deploy (`cdk deploy AiCoE-Agents` → **sync modules.json AND vault/qa/ to the
+  vault bucket** → push) + user live smoke (FR-039/040/041). Then flip Status/INDEX ☑.
+
 ## D. References
 - Brief: FRs 039-041, AGENT-09
 - Foundation: `ai_docs/tasks/00_foundation.md`
