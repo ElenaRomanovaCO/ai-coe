@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01, 02
 > **Blocks:** none
 > **Estimated effort:** 3-4 days solo (most complex UI in Wave 4)
-> **Status:** ☐ Not started
+> **Status:** ☑ Done — deployed + live-verified (backend + UI smoke) 2026-06-10
 
 ---
 
@@ -111,6 +111,39 @@ Tools: list_prompts, get_prompt, run_prompt (calls Bedrock directly via shared b
 ---
 
 ## C. Notes & Decisions Log
+
+- **2026-06-10 — Deployed + backend-smoked live; user UI smoke pending.** Commits pushed
+  (`bc2b106..2655300`). `cdk deploy AiCoE-Agents` (ModuleAgents +AGENT-11; AiCoE-Iam untouched)
+  → synced modules.json → backend smoke → pushed. Live AGENT-11: list (5 seed); get seed;
+  **save version → wrote `prompt-user-6112d60c57` v2 to sessions** (parent linked); list now
+  merges 6 (1 user); run vs Haiku → "PONG" 14/6 tok $0.000035 816ms; suggest → 4 flags + 4
+  suggestions; version_history → v1 seed → v2 user lineage. (Smoke left a "AI Risk v2 (smoke)"
+  user prompt in the live sessions bucket — benign, visible in the studio.)
+- **2026-06-10 — DONE ☑.** Amplify build green; user smoked the live studio (edit→save v2→run
+  →diff→fork→suggest). Status + INDEX flipped ☑. FRs 036-038 verified live. **Wave 4 complete
+  (11, 12, 13 all LIVE).**
+- **Storage (decided w/ user):** user-created versions/forks write to the **sessions** bucket
+  (`prompts/{id}.md`), NOT vault → not embedded, no reembed on save. Seed prompts stay
+  read-only in vault; `list_prompts`/`get_prompt` merge both (source = seed|user).
+- **run_prompt transport (decided w/ user):** non-streaming invoke → returns full output +
+  tokens_in/out + cost_usd + latency_ms (from `Usage` + measured latency). Reframes DoD's
+  "streams response" as "runs and displays". Model selector maps tier→id via
+  `lib_models.TIER_TO_MODEL_ID` (Sonnet/Haiku/Opus).
+- **suggest_improvements** = deterministic anti-pattern flags (undeclared/unused vars, no
+  output-format, no role, vague language, long-unstructured) + ONE Sonnet suggestion call
+  (fallback) — AGENT-05/24 precedent.
+- **Versioning:** save mode `version` (version+1, parent_id=source) / `fork` (version=1,
+  parent_id=source) / `new`; new unique id each save. `version_history` walks parent_id
+  lineage. Diff = dependency-free `lineDiff()` (LCS) side-by-side + last-run outputs from
+  `sessionStorage` (no run persistence server-side).
+- **No new IAM/infra/decision** — module role already has vault+sessions Get/List, sessions
+  Put, and InvokeModel on Sonnet/Haiku/Opus+Titan. (Opus daily-cap enforcement deferred —
+  role permits Opus; UI shows an "Opus" note.)
+- **Verified local:** ruff clean, 261 pytest (+13), vault valid (58), `cdk synth` exit 0,
+  web `pnpm lint` + `build` clean (4 prompt-studio routes). React-19-safe UI.
+- **Remaining:** deploy (`cdk deploy AiCoE-Agents` → re-sync modules.json → push) + user live
+  smoke (FR-036/037/038). Then flip Status/INDEX ☑.
+
 ## D. References
 - Brief: FRs 036-038, AGENT-11
 - Foundation: `ai_docs/tasks/00_foundation.md`
