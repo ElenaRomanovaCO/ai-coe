@@ -7,7 +7,8 @@
 > **Depends on:** 00, 01, 02
 > **Blocks:** none
 > **Estimated effort:** 2 days solo
-> **Status:** ☐ Not started
+> **Status:** ◐ CODE-COMPLETE 2026-06-12 — backend + UI built, tests/lint/synth/build green,
+> NOT deployed (deploy + user live smoke pending). See Notes & Decisions Log.
 
 ---
 
@@ -86,6 +87,36 @@ Tools: list_learning_paths (filter role + stage), list_office_hours, list_thread
 ---
 
 ## C. Notes & Decisions Log
+
+**2026-06-12 — Build (backend-core + UI), code-complete, NOT deployed.**
+
+- **AGENT-07 CommunityAgent** (Haiku, mechanical, read-mostly): ops `list_learning_paths`
+  (role+stage filter, FR-061), `list_office_hours` (sorted by date; marks the caller's signups,
+  FR-062), `signup_office_hours`/`cancel_office_hours` (idempotent write to the user profile
+  `users/{slug}.json` — AGENT-03 profile-sidecar pattern), `get_expert_directory` (expertise+industry
+  filter, FR-063), `list_threads`, default = hub overview (counts). Reads via S3 list + `_split_frontmatter`
+  (AGENT-08 shape). Registered in router; module-6 `enabled:true` + `ui_route:/modules/community`.
+- **DECISION — `list_threads` composes AGENT-09 (Module 8 Q&A) in-process** rather than duplicating a
+  thread store (AGENT-14→AGENT-21 composition precedent). One source of truth for threads. The web hub's
+  "Community Threads" card links straight to `/modules/qa` — no separate threads page built.
+- **New `community` content type + `CommunityFrontmatter` schema** (one `community/` folder, three kinds
+  discriminated by `kind`: learning-path / office-hours / expert; sub-folders organize them). Added to
+  `CONTENT_TYPE_BY_FOLDER`. Permissive single demo schema (kind-specific fields optional). Seeded **13
+  files**: 5 learning paths, 3 office hours, 5 expert personas (generic demo personas, no real PII / company
+  names). These embed via ReEmbed like other vault content (curated, useful — not excluded from KB search).
+- **No new IAM/infra** — module-agents role already has vault Get/List + sessions Get/Put. Deploy rebuilds
+  the module image only.
+- Web: `/modules/community` hub (4 cards + overview counts) + `/learning` (role/stage filter) +
+  `/office-hours` (signup/cancel) + `/experts` (debounced expertise/industry filter); `actions.ts`,
+  `lib/community.ts`; nav module-6 flipped live. React-19-safe (no setState-in-effect).
+- Gates green: 428 pytest (8 new in `tests/test_agent_07.py`), ruff clean, synth exit 0, vault valid
+  (92 files), web lint + build clean (4 community routes).
+
+**REMAINING:** deploy (`cdk deploy AiCoE-Agents` → re-sync modules.json + **sync `vault/community/`** to the
+vault bucket [seeds must land+embed] → push) + user live smoke (FR-061 filter learning paths by role; FR-062
+sign up for an office hour → persists across reload; FR-063 filter experts by industry). Then flip
+INDEX/task header ☑.
+
 ## D. References
 - Brief: FRs 061-063, AGENT-07
 - Foundation: `ai_docs/tasks/00_foundation.md`

@@ -104,7 +104,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     title: "Learn & Community",
     items: [
-      { id: "module-6", label: "Community", wave: 6, icon: Users, enabled: false, purpose: "Peer expertise & enablement." },
+      { id: "module-6", label: "Community", wave: 6, icon: Users, route: "/modules/community", enabled: true, purpose: "Peer expertise & enablement." },
       { id: "module-5", label: "Contribute", wave: 6, icon: Sparkles, enabled: false, purpose: "Contribute new vault assets." },
       { id: "module-23", label: "Onboarding", wave: 6, icon: GraduationCap, enabled: false, purpose: "Consultant onboarding journey." },
       { id: "module-20", label: "Certification", wave: 6, icon: Award, enabled: false, purpose: "Certification & badging." },
