@@ -144,6 +144,32 @@ class QaThreadFrontmatter(BaseModel):
     answers: list[QaAnswer] = []
 
 
+class CommunityFrontmatter(BaseModel):
+    """A Community & Enablement Hub entry (Module 6). One ``community/`` folder holds
+    three kinds, discriminated by ``kind``; sub-folders (``learning-paths/``,
+    ``office-hours/``, ``experts/``) organize them. Fields beyond id/kind/title are
+    optional and kind-specific, so this stays a single permissive demo schema."""
+
+    id: str
+    kind: Literal["learning-path", "office-hours", "expert"]
+    title: str
+    tags: list[str] = []
+    # learning-path
+    role: str | None = None
+    stage: int | None = None
+    duration: str | None = None
+    modules: list[str] = []
+    # office-hours
+    host: str | None = None
+    date: str | None = None
+    topic: str | None = None
+    capacity: int | None = None
+    # expert
+    name: str | None = None
+    expertise: list[str] = []
+    industries: list[str] = []
+
+
 class SampleDocFrontmatter(BaseModel):
     """Light schema for demo-continuity samples (assessments, kits, decisions).
 
@@ -168,6 +194,7 @@ CONTENT_TYPE_BY_FOLDER: dict[str, tuple[str, type[BaseModel]]] = {
     "exchange": ("exchange", ExchangeFrontmatter),
     "prompts": ("prompt", PromptFrontmatter),
     "qa": ("qa-thread", QaThreadFrontmatter),
+    "community": ("community", CommunityFrontmatter),
     "assessments": ("assessment", SampleDocFrontmatter),
     "kits": ("kit", SampleDocFrontmatter),
     "decisions": ("decision", SampleDocFrontmatter),

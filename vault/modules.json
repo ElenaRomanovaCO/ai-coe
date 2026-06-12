@@ -122,7 +122,8 @@
       "agent_id": "AGENT-07",
       "model_tier": "haiku-4-5",
       "worker_ids": [],
-      "enabled": false
+      "enabled": true,
+      "ui_route": "/modules/community"
     },
     {
       "id": "module-7",
