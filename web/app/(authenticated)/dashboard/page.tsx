@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 
 import { ActiveEngagementsCard } from "@/components/dashboard/ActiveEngagementsCard";
 import { LearningProgressCard } from "@/components/dashboard/LearningProgressCard";
@@ -13,11 +14,15 @@ import { Button } from "@/components/ui/button";
 import { getDisplayName } from "@/lib/auth";
 import { OPEN_CHAT_EVENT, type DashboardSummary } from "@/lib/dashboard";
 
+import { getOnboardingProfile } from "../modules/onboarding/actions";
 import { getDashboardSummary } from "./actions";
+
+const ONBOARDING_PROMPTED_KEY = "onboarding_prompted";
 
 // Client-driven: the dashboard is personalized by display_name, which lives in
 // localStorage (our auth model), so it can't be fetched in a Server Component.
 export default function DashboardPage() {
+  const router = useRouter();
   const name = useSyncExternalStore(
     () => () => {},
     () => getDisplayName(),
@@ -43,6 +48,36 @@ export default function DashboardPage() {
       active = false;
     };
   }, [name]);
+
+  // First-time hook (FR-068/Task-24 step 4): the first time a user lands on the
+  // dashboard, if they haven't completed onboarding, send them to the profile
+  // capture. Guarded by a one-shot localStorage flag so it never hijacks return
+  // visits or other navigation.
+  useEffect(() => {
+    if (!name) return;
+    let prompted = "1";
+    try {
+      prompted = window.localStorage.getItem(ONBOARDING_PROMPTED_KEY) ?? "";
+    } catch {
+      prompted = "1";
+    }
+    if (prompted) return;
+    let active = true;
+    getOnboardingProfile(name)
+      .then((r) => {
+        if (!active) return;
+        try {
+          window.localStorage.setItem(ONBOARDING_PROMPTED_KEY, "1");
+        } catch {
+          // best-effort; redirect still happens once below
+        }
+        if (!r.onboarding_completed) router.push("/modules/onboarding/profile");
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [name, router]);
 
   function openChat() {
     window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT));

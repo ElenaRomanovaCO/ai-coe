@@ -12,7 +12,13 @@ export function QuickActionsCard() {
         <CardTitle>Quick Actions</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        <Link href="/modules/asset-library" className={buttonVariants({ size: "sm" })}>
+        <Link href="/modules/onboarding" className={buttonVariants({ size: "sm" })}>
+          Start Onboarding
+        </Link>
+        <Link
+          href="/modules/asset-library"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
           Browse Assets
         </Link>
         <Link
