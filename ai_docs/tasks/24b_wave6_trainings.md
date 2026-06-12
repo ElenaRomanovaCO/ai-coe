@@ -7,8 +7,8 @@
 > **Depends on:** 00 (substrate), 01 (vault seed pattern), 03 (Asset Library — reuse its browse/detail UI + sidecar/save patterns), 04 (dashboard save), 06b (nav shell)
 > **Blocks:** nothing — but it **enriches** 24 (Onboarding) and 25 (Certification): both can later link to training `id`s instead of re-inventing learning content.
 > **Estimated effort:** ~1 day solo
-> **Status:** ◐ CODE-COMPLETE 2026-06-12 — backend + UI built, tests/lint/synth/build green,
-> NOT deployed (deploy + user live smoke pending). See Notes & Decisions Log (Build entry).
+> **Status:** ☑ DONE 2026-06-12 — deployed + live-verified (backend smoke + user UI smoke).
+> FRs 090-092 verified live. AiCoE-Agents image-only (no IAM delta). See Notes & Decisions Log (Build entry).
 >
 > **🎨 Design references — build to match these (they take precedence over any sketch below):**
 > - Design system: `ui-designs/design-system.md` (Praxis wordmark, Hanken Grotesk, indigo)
