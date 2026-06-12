@@ -7,8 +7,8 @@
 > **Depends on:** 00, 01, 02, 03 (Asset Library)
 > **Blocks:** none
 > **Estimated effort:** 2-3 days solo
-> **Status:** ◐ CODE-COMPLETE 2026-06-12 — backend + UI built, tests/lint/synth/build green,
-> NOT deployed (deploy + user live smoke pending). See Notes & Decisions Log.
+> **Status:** ☑ DONE 2026-06-12 — deployed + live-verified (backend full-flow smoke + user UI smoke).
+> FRs 064-066 verified live. AiCoE-Agents image-only (no IAM delta). See Notes & Decisions Log.
 
 ---
 
