@@ -7,7 +7,8 @@
 > **Depends on:** 00, 01, 02, 05 (assessment), 20 (benchmark)
 > **Blocks:** none
 > **Estimated effort:** 3 days solo
-> **Status:** ☐ Not started
+> **Status:** ◐ CODE-COMPLETE 2026-06-12 — backend + UI built, tests/lint/synth/build green,
+> NOT deployed (deploy + user live smoke pending). See Notes & Decisions Log.
 
 ---
 
@@ -126,6 +127,49 @@ Tools: invoke_worker (WORKER-06), invoke_worker (WORKER-07), update_section, exp
 ---
 
 ## C. Notes & Decisions Log
+
+**2026-06-12 — Build (backend-core + UI), code-complete, NOT deployed.** Three deviations from
+the written spec, each chosen by the user before coding:
+
+1. **No workers — AGENT-14 is inline (skeleton + one Sonnet call).** The spec listed WORKER-06
+   (narrative_writer) + WORKER-07 (benchmark_lookup), but the locked worker-pattern keeps workers
+   deterministic/no-LLM and the newest document-generator (AGENT-29 SOW) folded prose into the
+   agent's single Sonnet call. AGENT-14 reads the assessment, **composes AGENT-21 BenchmarkAgent
+   in-process** for the peer distribution (AGENT-16→AGENT-03 composition precedent — no worker, no
+   cross-Lambda hop), builds a deterministic 6-section skeleton, and makes ONE Sonnet call for the
+   narrative prose, with a deterministic fallback. Applies `vault/decisions/agent-05-orchestration.md`;
+   no new decision file.
+2. **PDF export rendered client-side via `@react-pdf/renderer`** (FR-060) — `web/lib/reportPdf.tsx`,
+   dynamically imported on click so the lib stays out of the SSR/main bundle. This is the platform's
+   **first real PDF export** (SOW/Kit Builder only did presigned markdown). The PDF renders the
+   structured sections, not the markdown, so layout is controlled independently of the preview.
+   *Candidate for a formal `vault/decisions/` entry (`client-report-pdf-export`) since later
+   export-bearing modules may reuse it — run `/log-decision` to formalize.*
+3. **Reports persist to the SESSIONS bucket** (`reports/{display_name}/{report_id}.md` + `.json`),
+   not `vault/reports/` as the spec said — client-specific deliverables must not enter the searchable
+   KB (AGENT-29 storage precedent). `update_section` rewrites both objects (FR-059 persistence).
+
+**What was built:**
+- Backend: `agents/lambdas/modules/agent_14_report.py` (ops generate/get/list/update_section),
+  registered in `modules/router.py` REGISTRY as AGENT-14; `vault/modules.json` module-14
+  `enabled: true` + `ui_route: /modules/reports`, `worker_ids: []`. 11 tests in
+  `tests/test_agent_14.py` (compose real AGENT-21 over a seeded assessment + benchmark seed).
+- Web: `/modules/reports` landing (generate-from-completed-assessment + past-reports lists),
+  `/modules/reports/[report_id]` editor (split: per-section edit + Save → `update_section`, live
+  preview, **Export PDF**), `web/lib/reports.ts` + `web/lib/reportPdf.tsx`, `actions.ts`,
+  `components/reports/{ReportEditor,GenerateReportButton}.tsx`. Wired the assessment result page's
+  "Generate client report" button (was disabled) → `GenerateReportButton`. Flipped nav module-14 live.
+  Added `@react-pdf/renderer@4.5.1` (pnpm lockfile updated).
+- **No new IAM/infra** — module-agents role already has sessions Get/Put/List + vault Get/List +
+  Sonnet (region-wildcarded). Deploy only rebuilds the module image.
+- Gates green: 420 pytest, ruff clean (agents), `python app.py` synth exit 0, vault valid (79),
+  web pnpm lint + build clean (both report routes compiled).
+
+**REMAINING:** deploy (`cdk deploy AiCoE-Agents` → re-sync modules.json to vault bucket → push;
+Amplify auto-builds report pages) + user live smoke (FR-058 generate from a stage-2 healthcare
+assessment → 6 sections; FR-059 edit a section → preview updates + persists across reload; FR-060
+Export PDF → file opens cleanly). Then flip INDEX/task header ☑.
+
 ## D. References
 - Brief: FRs 058-060, AGENT-14, WORKER-06/07
 - Foundation: `ai_docs/tasks/00_foundation.md`

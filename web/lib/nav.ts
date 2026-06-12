@@ -88,7 +88,7 @@ export const NAV_GROUPS: NavGroup[] = [
       // Internal CoE tool: kept out of the chat assistant's live module set (modules.json
       // enabled:false) so it isn't surfaced as a client-facing capability.
       { id: "module-19", label: "Decision Log", wave: 5, icon: BookMarked, route: "/modules/decisions", enabled: true, purpose: "Project decision log — capture decisions & rationale; surface precedent." },
-      { id: "module-14", label: "Client Report", wave: 6, icon: FileText, enabled: false, purpose: "Client-facing maturity report." },
+      { id: "module-14", label: "Client Report", wave: 6, icon: FileText, route: "/modules/reports", enabled: true, purpose: "Client-facing maturity report." },
     ],
   },
   {

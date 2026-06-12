@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 
+import { GenerateReportButton } from "@/components/reports/GenerateReportButton";
 import { StageIndicator } from "@/components/StageIndicator";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { humanizeDimension } from "@/lib/assessment";
 
@@ -135,14 +135,7 @@ export default async function AssessmentResultPage({
             Benchmark vs peers
           </Link>
 
-          <Button
-            variant="outline"
-            className="w-full"
-            disabled
-            title="Enabled with the Client Report module (Module 14)"
-          >
-            Generate client report
-          </Button>
+          <GenerateReportButton assessmentId={id} />
         </div>
       </div>
     </div>
