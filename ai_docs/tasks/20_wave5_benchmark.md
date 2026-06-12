@@ -7,7 +7,7 @@
 > **Depends on:** 00, 01, 02, 05 (Maturity Assessment)
 > **Blocks:** Module 14 (Client Report uses benchmarks)
 > **Estimated effort:** 1-2 days solo
-> **Status:** ☐ Not started
+> **Status:** ☑ Built + verified locally (2026-06-11); commit/deploy pending review
 
 ---
 
@@ -97,6 +97,26 @@ Tools: get_peer_distribution (reads `_seed_peer_distribution.json` plus any real
 ---
 
 ## C. Notes & Decisions Log
+
+- **2026-06-11 (build):** AGENT-21 (Haiku) reads the client's stage + industry from the
+  assessment's **sessions state** (AGENT-02, located by id under `assessments/`), pulls the
+  peer distribution from the seeded `vault/benchmarks/_seed_peer_distribution.json`
+  (8 industries × stages 0-5, unknown industry → cross-industry fallback), and adds fixed
+  by-stage typical-use-cases + next-moves maps. Deterministic core + **one Haiku narrative**
+  (fallback references the peer cluster). `get` never persists; `export` writes a slide to
+  `vault/benchmarks/{display_name}/{ts}.md` tagged `generated: true` (runtime-vault-writers
+  convention — client-specific, scoped out of chat). The seed file is a `.json` (not `.md`)
+  so the ReEmbed pipeline + validate_vault skip it; no benchmark `.md` is committed.
+- **2026-06-11: no sidebar nav entry** (per the task) — Benchmark is always assessment-scoped
+  (`/modules/benchmark/[assessment_id]`); the entry point is a **"Benchmark vs peers" CTA on
+  the maturity-assessment result page**. module-22 enabled (Haiku tier) for chat routing; no
+  ui_route. No workers, no IAM change.
+
+**Verification (local):** `pytest agents/` 409 passed; `ruff` clean; `validate_vault.py` OK
+(79 files); web `tsc`/`eslint` clean, `next build` succeeds with `/modules/benchmark/[assessment_id]`.
+get (distribution + use cases + next moves + narrative + fallback + cross-industry fallback)
+and export (generated slide) covered by `test_agent_21.py`.
+
 ## D. References
 - Brief: FRs 056-057, AGENT-21
 - Foundation: `ai_docs/tasks/00_foundation.md`

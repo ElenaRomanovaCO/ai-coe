@@ -1,0 +1,13 @@
+{
+  "_comment": "Synthetic peer AI-maturity distributions per industry (stages 0-5, percent of peers). Demo-grade anonymized aggregate; not real client data. Read by AGENT-21 (Module 22). A .json (not .md) so the ReEmbed pipeline skips it.",
+  "industries": {
+    "technology":         {"0": 5,  "1": 10, "2": 20, "3": 30, "4": 25, "5": 10},
+    "financial-services": {"0": 5,  "1": 15, "2": 30, "3": 30, "4": 15, "5": 5},
+    "healthcare":         {"0": 10, "1": 25, "2": 30, "3": 20, "4": 10, "5": 5},
+    "retail":             {"0": 8,  "1": 22, "2": 30, "3": 25, "4": 12, "5": 3},
+    "manufacturing":      {"0": 12, "1": 28, "2": 30, "3": 18, "4": 9,  "5": 3},
+    "energy":             {"0": 12, "1": 25, "2": 30, "3": 20, "4": 9,  "5": 4},
+    "public-sector":      {"0": 18, "1": 30, "2": 28, "3": 15, "4": 7,  "5": 2},
+    "cross-industry":     {"0": 10, "1": 22, "2": 28, "3": 22, "4": 13, "5": 5}
+  }
+}
