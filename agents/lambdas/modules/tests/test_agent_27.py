@@ -153,7 +153,9 @@ def test_no_untyped_entries():
         text = f.read_text(encoding="utf-8")
         fm = yaml.safe_load(text.split("---", 2)[1])
         assert fm.get("content_type") == "exchange", f"{f.name} missing content_type: exchange"
-        assert fm.get("tool") in {"claude-code", "claude-cowork", "copilot", "kiro", "google", "generic"}
+        assert fm.get("tool") in {
+            "claude-code", "claude-cowork", "copilot", "kiro", "google", "generic",
+        }
         assert fm.get("category") in {
             "skill", "slash-command", "mcp-server", "plugin", "prompt-pack", "config",
         }

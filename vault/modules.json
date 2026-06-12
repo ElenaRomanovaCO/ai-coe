@@ -327,7 +327,8 @@
       "agent_id": "AGENT-15",
       "model_tier": "sonnet-4-6",
       "worker_ids": [],
-      "enabled": false
+      "enabled": true,
+      "ui_route": "/modules/retros"
     },
     {
       "id": "module-17",
@@ -536,13 +537,13 @@
     },
     {
       "id": "module-27",
-      "name": "Agentic Development Accelerator",
+      "name": "SDLC Accelerator",
       "wave": 7,
-      "purpose": "Generate scaffolded starter code from a reference architecture (Opus, cost-capped).",
+      "purpose": "Accelerate the full AI delivery SDLC — design docs, specs, tests, and code — from a reference architecture (Opus, cost-capped).",
       "when_to_use": [
-        "User wants to generate a starter codebase from an architecture",
-        "User asks to scaffold an implementation",
-        "User needs runnable boilerplate aligned to a pattern"
+        "User wants to generate design docs, specs, tests, or starter code from an architecture",
+        "User asks to scaffold an implementation across the SDLC",
+        "User needs runnable boilerplate, test suites, or spec drafts aligned to a pattern"
       ],
       "example_queries": [
         "Generate a FastAPI + Lambda starter from the healthcare RAG architecture",
@@ -551,7 +552,7 @@
       ],
       "agent_id": "AGENT-26",
       "model_tier": "opus-4-7",
-      "worker_ids": ["WORKER-14", "WORKER-15", "WORKER-16"],
+      "worker_ids": ["WORKER-14", "WORKER-15", "WORKER-16", "WORKER-17", "WORKER-18", "WORKER-19"],
       "enabled": false
     },
     {
@@ -573,6 +574,69 @@
       "model_tier": "haiku-4-5",
       "worker_ids": [],
       "ui_route": "/modules/exchange",
+      "enabled": true
+    },
+    {
+      "id": "module-29",
+      "name": "AI Project ROI Calculator",
+      "wave": 5,
+      "purpose": "Estimate the cost, expected value, ROI, and payback period for a proposed AI project.",
+      "when_to_use": [
+        "User wants a business case or ROI estimate for an AI initiative",
+        "User asks what an AI project will cost and return",
+        "User needs payback/break-even numbers to justify an engagement"
+      ],
+      "example_queries": [
+        "Estimate ROI for an AI document-processing project",
+        "What's the payback period for a fraud-scoring build?",
+        "Build a business case for a RAG assistant"
+      ],
+      "agent_id": "AGENT-28",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "ui_route": "/modules/roi-calculator",
+      "enabled": true
+    },
+    {
+      "id": "module-30",
+      "name": "AI SOW Generator",
+      "wave": 5,
+      "purpose": "Draft a statement of work (objectives, scope, deliverables, timeline, assumptions) for an AI engagement.",
+      "when_to_use": [
+        "User wants a draft SOW for an AI engagement",
+        "User asks to formalize scope and deliverables into a contract document",
+        "User needs a timeline and assumptions section for a proposal"
+      ],
+      "example_queries": [
+        "Draft an SOW for a healthcare RAG pilot",
+        "Generate a statement of work for a 6-week fraud-scoring build",
+        "Write scope and deliverables for an AI assessment engagement"
+      ],
+      "agent_id": "AGENT-29",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "ui_route": "/modules/sow-generator",
+      "enabled": true
+    },
+    {
+      "id": "module-31",
+      "name": "Vendor Vetting",
+      "wave": 5,
+      "purpose": "Vet and manage AI vendors — security posture, data handling, compliance certifications, and approval status — for engagement use.",
+      "when_to_use": [
+        "User wants to vet an AI vendor before using it on an engagement",
+        "User asks whether a vendor meets the security and compliance bar",
+        "User needs the approval status or risk tier for a vendor"
+      ],
+      "example_queries": [
+        "Vet this LLM vendor for a healthcare engagement",
+        "What's the approval status of our vector DB vendors?",
+        "Which vendors are cleared for PII workloads?"
+      ],
+      "agent_id": "AGENT-30",
+      "model_tier": "sonnet-4-6",
+      "worker_ids": [],
+      "ui_route": "/modules/vendor-vetting",
       "enabled": true
     }
   ]

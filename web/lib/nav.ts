@@ -77,9 +77,9 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: "module-1", label: "AI Maturity Assessment", wave: 2, icon: BarChart3, route: "/modules/maturity-assessment", enabled: true, purpose: "Place a client on the 0–5 AI maturity curve." },
       { id: "module-12", label: "AI Use Case Ideation", wave: 5, icon: Lightbulb, route: "/modules/ideation", enabled: true, purpose: "Generate & rank AI use cases." },
-      { id: "module-29", label: "AI Project ROI Calculator", wave: 5, icon: Calculator, enabled: false, purpose: "Estimate cost, value & ROI for an AI project. (Coming soon.)" },
-      { id: "module-30", label: "AI SOW Generator", wave: 5, icon: FileSignature, enabled: false, purpose: "Draft a statement of work for an AI engagement. (Coming soon.)" },
-      { id: "module-31", label: "Vendor Vetting", wave: 5, icon: BadgeCheck, enabled: false, purpose: "Vet & manage AI vendors — security, compliance & approval status. (Coming soon.)" },
+      { id: "module-29", label: "AI Project ROI Calculator", wave: 5, icon: Calculator, route: "/modules/roi-calculator", enabled: true, purpose: "Estimate cost, value & ROI for an AI project." },
+      { id: "module-30", label: "AI SOW Generator", wave: 5, icon: FileSignature, route: "/modules/sow-generator", enabled: true, purpose: "Draft a statement of work for an AI engagement." },
+      { id: "module-31", label: "Vendor Vetting", wave: 5, icon: BadgeCheck, route: "/modules/vendor-vetting", enabled: true, purpose: "Vet & manage AI vendors — security, compliance & approval status." },
       { id: "module-4", label: "Governance & Risk", wave: 3, icon: ShieldCheck, route: "/modules/governance", enabled: true, purpose: "Check use cases against AI controls." },
       { id: "module-21", label: "Ethics & Bias Checker", wave: 3, icon: Scale, route: "/modules/ethics-checker", enabled: true, purpose: "Flag ethics & bias risks." },
       { id: "module-25", label: "Compliance Tracker", wave: 3, icon: ClipboardCheck, route: "/modules/compliance-tracker", enabled: true, purpose: "Global AI regulation tracker." },
