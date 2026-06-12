@@ -170,6 +170,29 @@ class CommunityFrontmatter(BaseModel):
     industries: list[str] = []
 
 
+class TrainingFrontmatter(BaseModel):
+    """A Trainings catalog entry (Module 32). Curated reference content — seeded into the
+    vault and indexed so Chat/Q&A can recommend it. ``kind`` discriminates CoE-hosted
+    sessions from external tutorials; presenter/session_date/materials are hosted-only."""
+
+    id: str
+    title: str
+    summary: str
+    kind: Literal["hosted", "tutorial"]
+    theme: str
+    source: str
+    level: Literal["beginner", "intermediate", "advanced"]
+    url: str
+    duration_min: int = 0
+    author: str = ""
+    presenter: str = ""
+    session_date: str = ""
+    materials: list[dict] = []
+    tags: list[str] = []
+    last_verified: str
+    updated_at: str
+
+
 class SampleDocFrontmatter(BaseModel):
     """Light schema for demo-continuity samples (assessments, kits, decisions).
 
@@ -195,6 +218,7 @@ CONTENT_TYPE_BY_FOLDER: dict[str, tuple[str, type[BaseModel]]] = {
     "prompts": ("prompt", PromptFrontmatter),
     "qa": ("qa-thread", QaThreadFrontmatter),
     "community": ("community", CommunityFrontmatter),
+    "trainings": ("training", TrainingFrontmatter),
     "assessments": ("assessment", SampleDocFrontmatter),
     "kits": ("kit", SampleDocFrontmatter),
     "decisions": ("decision", SampleDocFrontmatter),

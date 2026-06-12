@@ -640,6 +640,27 @@
       "worker_ids": [],
       "ui_route": "/modules/vendor-vetting",
       "enabled": true
+    },
+    {
+      "id": "module-32",
+      "name": "Trainings",
+      "wave": 6,
+      "purpose": "Browse CoE-hosted trainings and curated external tutorials (Udemy, YouTube, LinkedIn Learning) grouped by theme.",
+      "when_to_use": [
+        "User wants to learn a topic and asks for a course or tutorial",
+        "User asks what hosted trainings or recordings are available",
+        "User needs a recommended learning resource for a theme (RAG, agents, governance, ...)"
+      ],
+      "example_queries": [
+        "What trainings do we have on RAG?",
+        "Recommend a beginner course on prompt engineering",
+        "Show recorded sessions on Bedrock"
+      ],
+      "agent_id": "AGENT-31",
+      "model_tier": "haiku-4-5",
+      "worker_ids": [],
+      "ui_route": "/modules/trainings",
+      "enabled": true
     }
   ]
 }
