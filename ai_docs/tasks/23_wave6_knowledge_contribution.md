@@ -7,7 +7,8 @@
 > **Depends on:** 00, 01, 02, 03 (Asset Library)
 > **Blocks:** none
 > **Estimated effort:** 2-3 days solo
-> **Status:** ☐ Not started
+> **Status:** ◐ CODE-COMPLETE 2026-06-12 — backend + UI built, tests/lint/synth/build green,
+> NOT deployed (deploy + user live smoke pending). See Notes & Decisions Log.
 
 ---
 
@@ -109,6 +110,37 @@ Tools: submit_asset (writes to `vault/pending/{pending_id}.md`), run_anonymizati
 ---
 
 ## C. Notes & Decisions Log
+
+**2026-06-12 — Build (backend-core + UI), code-complete, NOT deployed.**
+
+- **AGENT-06 ContributeAgent** (`agent_06_contribute.py`, Sonnet): ops `submit_asset` (persist +
+  inline analysis), `run_anonymization`, `suggest_tags`, `list_pending`, `get_pending`, `approve_asset`,
+  `reject_asset`. **One Sonnet call** (`_analyze`) does anonymization (flagged spans + anonymized body) AND
+  tag suggestion together; **duplicate check composes AGENT-03's vector search** (Titan→S3 Vectors); offsets
+  computed server-side via `body.find(span)`. Deterministic no-op fallback if Sonnet fails.
+- **KEY DECISION — pending submissions live in the SESSIONS bucket** (`contributions/{id}.json`), NOT the
+  spec's `vault/pending/`. Un-reviewed, un-anonymized content must never reach the vault, where ReEmbed would
+  index it into the searchable KB before curation — applies the `curated-content-in-vault` principle (only
+  reviewed content enters the vault). `approve_asset` writes the final markdown to
+  `vault/assets/{industry}/{ai_stage}/{slug}.md` (valid `AssetFrontmatter` via `yaml.safe_dump`) → ReEmbed
+  indexes it → it appears in the Asset Library; the pending record is marked `review_status: approved` (no S3
+  delete). **Consequence: NO new IAM** — the module-agents role already has vault+sessions Get/Put + Sonnet +
+  Titan + s3vectors (delete was the only thing a vault/pending move would have needed, and it's avoided).
+- **Naming fix:** the record's lifecycle field is `review_status` (pending/approved/rejected), not `status`,
+  to avoid colliding with the `{"status": "ok"}` response envelope when the record is spread.
+- `target_path` guarded to `assets/` (rejects path traversal / writes outside the library).
+- Registered AGENT-06 in router; module-5 `enabled:true` + `ui_route:/modules/contribute`.
+- Web: `/modules/contribute` (submission form → inline anonymization flags + duplicates + suggested tags) +
+  `/modules/contribute/pending` (curator queue) + `/modules/contribute/[id]` (`ContributeReview`: editable
+  anonymized body + flagged spans on the left; frontmatter editor + tag chips + duplicates + Approve/Reject on
+  the right; approved → links to the new Asset Library page); `actions.ts`, `lib/contribute.ts`; nav module-5 live.
+- Gates: 445 pytest (9 new `tests/test_agent_06.py`), ruff clean, synth exit 0, vault valid (107), web lint +
+  build clean (3 contribute routes).
+
+**REMAINING:** deploy (`cdk deploy AiCoE-Agents` → re-sync modules.json → push) + user live smoke (FR-064
+submit a case study w/ synthetic names → flags; FR-066 anonymize + tag + duplicate; FR-065 approve → asset
+appears in Asset Library). Then flip INDEX/header ☑.
+
 ## D. References
 - Brief: FRs 064-066, AGENT-06
 - Foundation: `ai_docs/tasks/00_foundation.md`
