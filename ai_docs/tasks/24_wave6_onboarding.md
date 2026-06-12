@@ -103,6 +103,45 @@ Tools: generate_path, list_first_actions, recommend_connections.
 ---
 
 ## C. Notes & Decisions Log
+
+**2026-06-12 — CODE-COMPLETE (backend + UI), NOT deployed.** AGENT-22
+(`agents/lambdas/modules/agent_22_onboarding.py`, Haiku, fully mechanical — no
+chat-LLM loop) **composes three existing agents in-process** (AGENT-03 assets,
+AGENT-07 learning paths + experts, AGENT-08 tools) and persists to the shared
+`users/{slug}.json` profile (read-modify-write, never clobbers saved assets /
+office-hour signups). Ops: `generate_path` (default, the full personalized
+OnboardingPath — FR-067), `save_profile` (validates the OnboardingProfile,
+sets `onboarding_completed=true`), `get_profile`/`read_profile`,
+`list_first_actions` (the 30-day checklist with done-state merged — FR-068),
+`recommend_connections` (experts by industry), `update_checklist` (toggle one
+item, persisted). Personalization is deterministic: top assets ranked by
+industry-focus + goal-tag overlap (backfilled so the path is never empty),
+learning paths matched on a role→learning-role map, tools ranked by an
+ai_background→stage band, experts filtered by industry_focus. **No Titan / S3
+Vectors call → no new IAM** (module-agents role already has vault Get/List +
+sessions Get/Put). Registered AGENT-22 in `modules/router.py`; flipped
+module-23 `enabled:true` + `ui_route:/modules/onboarding` in `modules.json`.
+
+Web: `/modules/onboarding` landing (intro + highlights + CTA), `/profile`
+(role / experience / AI-background / industry-focus / goals form → `save_profile`
+→ routes to path), `/path` (5 sections — top assets, learning, key tools,
+people, each linking into its module — plus a grouped Week 1–4 **30-day checklist**
+with optimistic, persisted checkboxes + progress bar). New reusable
+`web/components/GuidedTour.tsx` (opt-in tooltip-overlay walkthrough, per-tour
+localStorage dismissal, re-triggerable via "Take a tour") mounted on the path
+page (FR-068 guided tour). `web/lib/onboarding.ts` types + `actions.ts` server
+actions. Nav module-23 flipped live; dashboard QuickActions adds "Start
+Onboarding"; **first-time hook**: the dashboard redirects a user with no
+`onboarding_completed` to `/profile` once (guarded by an `onboarding_prompted`
+localStorage flag so it never hijacks return visits).
+
+Gates: 459 pytest (14 new in `tests/test_agent_22.py`), ruff clean, `python app.py`
+synth exit 0, vault valid 108, web lint + build clean (3 onboarding routes).
+**REMAINING:** commit (held per hand-off-deploy rule) → `cdk deploy AiCoE-Agents`
+→ re-sync `modules.json` to vault bucket → push (Amplify auto-builds onboarding
+pages) → user live smoke (FR-067 profile → personalized path; FR-068 guided tour +
+30-day checklist persists) → flip INDEX/header ☑.
+
 ## D. References
 - Brief: FRs 067-068, AGENT-22
 - Foundation: `ai_docs/tasks/00_foundation.md`

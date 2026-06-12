@@ -474,7 +474,8 @@
       "agent_id": "AGENT-22",
       "model_tier": "haiku-4-5",
       "worker_ids": [],
-      "enabled": false
+      "ui_route": "/modules/onboarding",
+      "enabled": true
     },
     {
       "id": "module-24",
