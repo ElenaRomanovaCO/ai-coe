@@ -7,7 +7,12 @@
 > **Depends on:** 00, 01, 02, 05 (Maturity Assessment)
 > **Blocks:** Module 14 (Client Report uses benchmarks)
 > **Estimated effort:** 1-2 days solo
-> **Status:** ☑ Built + verified locally (2026-06-11); commit/deploy pending review
+> **Status:** ☑ DONE — deployed + live-verified (2026-06-11). AiCoE-Iam no IAM delta;
+> AiCoE-Agents image-only. Order: cdk deploy → sync seed + modules.json → push web. Live
+> smoke: get (healthcare stage-2 assessment) → seed distribution (30% peer cohort at stage 2),
+> stage-2 next moves, grounded narrative ("ahead of 65%…"); export → generated slide written
+> to vault. Amplify #50 SUCCEED on `2fdff5f`; benchmark route serves; "Benchmark vs peers" CTA
+> on the assessment result. Smoke artifacts cleaned. **Wave 5 complete.**
 
 ---
 

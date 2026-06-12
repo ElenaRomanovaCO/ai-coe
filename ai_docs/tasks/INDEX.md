@@ -130,7 +130,7 @@ Demo outcome: feed + ideation + decisions + project health + retros + benchmarks
 | 17 | [17_wave5_decision_log.md](./17_wave5_decision_log.md) | Module 19 | 048, 049, 050 | AGENT-18 | 00-16 | ☐ |
 | 18 | [18_wave5_project_health.md](./18_wave5_project_health.md) | Module 18 | 051, 052, 053 | AGENT-17 | 00-17 | ☑ |
 | 19 | [19_wave5_retrospective.md](./19_wave5_retrospective.md) | Module 16 | 054, 055 | AGENT-15 | 00-18 | ☑ |
-| 20 | [20_wave5_benchmark.md](./20_wave5_benchmark.md) | Module 22 | 056, 057 | AGENT-21 | 00-19 | ☐ |
+| 20 | [20_wave5_benchmark.md](./20_wave5_benchmark.md) | Module 22 | 056, 057 | AGENT-21 | 00-19 | ☑ |
 
 **Wave 5 acceptance:** Feed personalization shifts with profile; ideation produces ranked candidates; decision similarity surfaces precedent; project health flags risks; retros extract insights; benchmark renders + exports.
 
