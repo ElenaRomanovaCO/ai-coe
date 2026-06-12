@@ -143,13 +143,14 @@ Demo outcome: client report PDF, community, contributions, onboarding, certifica
 | # | Task File | Module | Covers FRs | Agents | Depends On | Status |
 |---|---|---|---|---|---|---|
 | 21 | [21_wave6_client_report.md](./21_wave6_client_report.md) | Module 14 | 058, 059, 060 | AGENT-14 | 00-20 | ☑ |
-| 22 | [22_wave6_community_hub.md](./22_wave6_community_hub.md) | Module 6 | 061, 062, 063 | AGENT-07 | 00-21 | ☐ |
+| 22 | [22_wave6_community_hub.md](./22_wave6_community_hub.md) | Module 6 | 061, 062, 063 | AGENT-07 | 00-21 | ☑ |
 | 23 | [23_wave6_knowledge_contribution.md](./23_wave6_knowledge_contribution.md) | Module 5 | 064, 065, 066 | AGENT-06 | 00-22 | ☐ |
 | 24 | [24_wave6_onboarding.md](./24_wave6_onboarding.md) | Module 23 | 067, 068 | AGENT-22 | 00-23 | ☐ |
+| **24b** | [24b_wave6_trainings.md](./24b_wave6_trainings.md) | **Module 32** | 090, 091, 092 | AGENT-31 | 00, 01, 03, 04, 06b | ☐ (expedited live) |
 | 25 | [25_wave6_certification.md](./25_wave6_certification.md) | Module 20 | 069, 070, 071 | AGENT-19 | 00-24 | ☐ |
 | 26 | [26_wave6_analytics.md](./26_wave6_analytics.md) | Module 10 | 072, 073 | AGENT-10 | 00-25 | ☐ |
 
-**Wave 6 acceptance:** Generate client report PDF → community hub functional → contribute + curate flow → onboarding personalizes → certifications earnable → analytics renders.
+**Wave 6 acceptance:** Generate client report PDF → community hub functional → contribute + curate flow → onboarding personalizes → certifications earnable → analytics renders. (24b Trainings is expedited live ahead of the rest of the wave — agent-free curated catalog.)
 
 ---
 
