@@ -30,6 +30,7 @@ import {
   ShieldCheck,
   Sparkles,
   Users,
+  Video,
   Wrench,
 } from "lucide-react";
 
@@ -106,6 +107,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: "module-6", label: "Community", wave: 6, icon: Users, route: "/modules/community", enabled: true, purpose: "Peer expertise & enablement." },
       { id: "module-5", label: "Contribute", wave: 6, icon: Sparkles, enabled: false, purpose: "Contribute new vault assets." },
+      { id: "module-32", label: "Trainings", wave: 6, icon: Video, route: "/modules/trainings", enabled: true, purpose: "Hosted trainings + curated external tutorials by theme." },
       { id: "module-23", label: "Onboarding", wave: 6, icon: GraduationCap, enabled: false, purpose: "Consultant onboarding journey." },
       { id: "module-20", label: "Certification", wave: 6, icon: Award, enabled: false, purpose: "Certification & badging." },
       { id: "module-10", label: "Analytics", wave: 6, icon: Building2, enabled: false, purpose: "Platform usage analytics." },

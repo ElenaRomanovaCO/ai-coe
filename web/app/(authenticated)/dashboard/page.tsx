@@ -8,6 +8,7 @@ import { QuickActionsCard } from "@/components/dashboard/QuickActionsCard";
 import { RecentChatsCard } from "@/components/dashboard/RecentChatsCard";
 import { RecommendationsCard } from "@/components/dashboard/RecommendationsCard";
 import { SavedAssetsCard } from "@/components/dashboard/SavedAssetsCard";
+import { SavedTrainingsCard } from "@/components/dashboard/SavedTrainingsCard";
 import { Button } from "@/components/ui/button";
 import { getDisplayName } from "@/lib/auth";
 import { OPEN_CHAT_EVENT, type DashboardSummary } from "@/lib/dashboard";
@@ -79,6 +80,7 @@ export default function DashboardPage() {
           <RecentChatsCard chats={summary?.recent_chats ?? []} onResume={openChat} />
           <RecommendationsCard assets={summary?.recommendations ?? []} />
           <QuickActionsCard />
+          <SavedTrainingsCard name={name} />
           <ActiveEngagementsCard />
           <LearningProgressCard />
         </div>

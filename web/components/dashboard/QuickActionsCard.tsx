@@ -63,6 +63,12 @@ export function QuickActionsCard() {
         >
           Vendor Vetting
         </Link>
+        <Link
+          href="/modules/trainings"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          Browse Trainings
+        </Link>
       </CardContent>
     </Card>
   );
