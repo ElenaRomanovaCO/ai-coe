@@ -57,6 +57,12 @@ export function QuickActionsCard() {
         >
           SOW Generator
         </Link>
+        <Link
+          href="/modules/vendor-vetting"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          Vendor Vetting
+        </Link>
       </CardContent>
     </Card>
   );
