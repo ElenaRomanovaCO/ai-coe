@@ -286,8 +286,9 @@
       ],
       "agent_id": "AGENT-14",
       "model_tier": "sonnet-4-6",
-      "worker_ids": ["WORKER-06", "WORKER-07"],
-      "enabled": false
+      "worker_ids": [],
+      "enabled": true,
+      "ui_route": "/modules/reports"
     },
     {
       "id": "module-15",
