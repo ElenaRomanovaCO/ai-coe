@@ -7,7 +7,13 @@
 > **Depends on:** 00, 01 (the 5 seed vendors in `vault/vendors/`), 10 (mirrors AGENT-24's list/get/assess shape)
 > **Blocks:** none
 > **Estimated effort:** ~1.5 days solo
-> **Status:** ☑ Built + verified locally (2026-06-11); commit/deploy pending review
+> **Status:** ☑ DONE — deployed + live-verified (2026-06-11). AiCoE-Iam confirmed no IAM
+> delta; AiCoE-Agents image-only. Order honored: cdk deploy → sync 5 vendor files + modules.json
+> → push web. Live smoke: assess llm-document-analysis (trains-on-data) → **high**; assess
+> embedding-models with data_sensitivity=phi (no BAA) → **high**; cloud-ai-platform → **low**;
+> set_status=conditional persisted across get (coexists with the assessment in one sidecar);
+> **Benchmarks (AGENT-13) regression clean** — still lists 5 evaluations. Amplify #48 SUCCEED
+> on `47405c2`; vendor-vetting + [id] serve. Smoke sidecars cleared (vendors reset to unvetted).
 
 ---
 
