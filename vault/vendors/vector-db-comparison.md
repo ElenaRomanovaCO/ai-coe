@@ -4,6 +4,17 @@ category: vector-db
 vendors_compared: ["Pinecone", "pgvector", "Amazon S3 Vectors"]
 criteria: ["latency", "scale", "operational-burden", "cost", "data-residency"]
 last_verified: "2026-05-19"
+vetting:
+  data_residency: "configurable by region"
+  sub_processors_disclosed: true
+  encryption_at_rest: true
+  encryption_in_transit: true
+  soc2_type2: true
+  iso27001: true
+  hipaa_baa: true
+  trains_on_customer_data: false
+  data_retention_days: 0
+  sso: true
 ---
 
 # Vector Database Comparison

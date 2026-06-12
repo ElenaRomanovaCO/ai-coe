@@ -4,6 +4,11 @@ category: orchestration-framework
 vendors_compared: ["LangChain", "LlamaIndex", "Strands Agents"]
 criteria: ["control", "aws-fit", "multi-agent", "maturity", "learning-curve"]
 last_verified: "2026-05-21"
+vetting:
+  data_residency: "self-hosted (your infra)"
+  encryption_in_transit: true
+  trains_on_customer_data: false
+  sso: false
 ---
 
 # Orchestration Framework Comparison

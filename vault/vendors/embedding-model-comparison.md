@@ -4,6 +4,17 @@ category: llm-provider
 vendors_compared: ["Titan Embed v2", "OpenAI text-embedding-3", "Cohere Embed"]
 criteria: ["retrieval-quality", "dimensions", "cost", "multilingual", "aws-fit"]
 last_verified: "2026-05-20"
+vetting:
+  data_residency: "US / EU"
+  sub_processors_disclosed: false
+  encryption_at_rest: true
+  encryption_in_transit: true
+  soc2_type2: true
+  iso27001: false
+  hipaa_baa: false
+  trains_on_customer_data: false
+  data_retention_days: 90
+  sso: false
 ---
 
 # Embedding Model Comparison

@@ -4,6 +4,17 @@ category: llm-provider
 vendors_compared: ["Claude Sonnet", "GPT-4o", "Gemini"]
 criteria: ["accuracy", "long-context", "cost", "latency", "safety-controls"]
 last_verified: "2026-05-22"
+vetting:
+  data_residency: "US"
+  sub_processors_disclosed: true
+  encryption_at_rest: true
+  encryption_in_transit: true
+  soc2_type2: true
+  iso27001: false
+  hipaa_baa: false
+  trains_on_customer_data: true
+  data_retention_days: 400
+  sso: true
 ---
 
 # LLM Provider Comparison — Document Analysis

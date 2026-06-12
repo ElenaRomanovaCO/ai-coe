@@ -4,6 +4,17 @@ category: cloud-ai-platform
 vendors_compared: ["AWS Bedrock", "Azure AI Foundry", "Google Vertex AI"]
 criteria: ["model-choice", "governance", "ecosystem-fit", "cost", "guardrails"]
 last_verified: "2026-05-23"
+vetting:
+  data_residency: "configurable by region"
+  sub_processors_disclosed: true
+  encryption_at_rest: true
+  encryption_in_transit: true
+  soc2_type2: true
+  iso27001: true
+  hipaa_baa: true
+  trains_on_customer_data: false
+  data_retention_days: 30
+  sso: true
 ---
 
 # Cloud AI Platform Comparison

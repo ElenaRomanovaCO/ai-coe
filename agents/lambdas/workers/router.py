@@ -26,6 +26,7 @@ from .worker_10_item_classifier import ItemClassifierWorker
 from .worker_11_commentary_writer import CommentaryWriterWorker
 from .worker_12_reg_summarizer import RegSummarizerWorker
 from .worker_13_applicability_checker import ApplicabilityCheckerWorker
+from .worker_20_vetting_scorer import VettingScorerWorker
 
 REGISTRY: dict[str, Callable[[], Worker]] = {
     "WORKER-01": QuestionPickerWorker,
@@ -39,6 +40,7 @@ REGISTRY: dict[str, Callable[[], Worker]] = {
     "WORKER-11": CommentaryWriterWorker,
     "WORKER-12": RegSummarizerWorker,
     "WORKER-13": ApplicabilityCheckerWorker,
+    "WORKER-20": VettingScorerWorker,
 }
 
 
