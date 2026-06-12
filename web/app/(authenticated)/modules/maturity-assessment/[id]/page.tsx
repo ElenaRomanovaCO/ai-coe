@@ -128,6 +128,13 @@ export default async function AssessmentResultPage({
             </CardContent>
           </Card>
 
+          <Link
+            href={`/modules/benchmark/${id}`}
+            className="block w-full rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            Benchmark vs peers
+          </Link>
+
           <Button
             variant="outline"
             className="w-full"
