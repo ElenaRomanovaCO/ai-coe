@@ -102,7 +102,8 @@
       "agent_id": "AGENT-06",
       "model_tier": "sonnet-4-6",
       "worker_ids": [],
-      "enabled": false
+      "enabled": true,
+      "ui_route": "/modules/contribute"
     },
     {
       "id": "module-6",
