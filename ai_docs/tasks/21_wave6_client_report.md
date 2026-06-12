@@ -7,8 +7,8 @@
 > **Depends on:** 00, 01, 02, 05 (assessment), 20 (benchmark)
 > **Blocks:** none
 > **Estimated effort:** 3 days solo
-> **Status:** ◐ CODE-COMPLETE 2026-06-12 — backend + UI built, tests/lint/synth/build green,
-> NOT deployed (deploy + user live smoke pending). See Notes & Decisions Log.
+> **Status:** ☑ DONE 2026-06-12 — deployed + live-verified (backend smoke + user UI smoke).
+> FRs 058-060 verified live. AiCoE-Agents image-only (no IAM delta). See Notes & Decisions Log.
 
 ---
 

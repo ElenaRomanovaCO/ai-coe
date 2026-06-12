@@ -142,7 +142,7 @@ Demo outcome: client report PDF, community, contributions, onboarding, certifica
 
 | # | Task File | Module | Covers FRs | Agents | Depends On | Status |
 |---|---|---|---|---|---|---|
-| 21 | [21_wave6_client_report.md](./21_wave6_client_report.md) | Module 14 | 058, 059, 060 | AGENT-14, WORKER-06/07 | 00-20 | ☐ |
+| 21 | [21_wave6_client_report.md](./21_wave6_client_report.md) | Module 14 | 058, 059, 060 | AGENT-14 | 00-20 | ☑ |
 | 22 | [22_wave6_community_hub.md](./22_wave6_community_hub.md) | Module 6 | 061, 062, 063 | AGENT-07 | 00-21 | ☐ |
 | 23 | [23_wave6_knowledge_contribution.md](./23_wave6_knowledge_contribution.md) | Module 5 | 064, 065, 066 | AGENT-06 | 00-22 | ☐ |
 | 24 | [24_wave6_onboarding.md](./24_wave6_onboarding.md) | Module 23 | 067, 068 | AGENT-22 | 00-23 | ☐ |
